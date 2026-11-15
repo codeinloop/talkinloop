@@ -54,7 +54,11 @@
   .lang:hover { border-color: var(--ink); }
 
   .hero { padding: 24px 0 0; }
+  .kicker { font: 500 15px var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--loop); margin-bottom: 16px; }
   .hero h1 { font-size: clamp(40px, 6vw, 84px); font-weight: 800; max-width: 14ch; }
+  .trigger { margin-top: 14px; font-size: 16px; color: var(--soft); max-width: 36em; }
+  .btn .stars { font-weight: 500; opacity: .75; margin-left: 6px; }
+  .btn[hidden] { display: none; }
   .hero .sub { margin-top: 20px; font-size: clamp(19px, 2vw, 24px); max-width: 34em; color: var(--soft); }
   .actions { margin-top: 30px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
   .btn { display: inline-block; font: 600 17px var(--body); padding: 14px 24px; border-radius: 12px; text-decoration: none; border: 2px solid var(--ink); cursor: pointer; }
@@ -62,10 +66,6 @@
   .btn.solid:hover { background: #000; }
   .btn.line { background: transparent; color: var(--ink); }
   .btn.line:hover { background: #fff; }
-  .cmd { display: inline-flex; align-items: center; gap: 14px; font: 500 16px var(--mono); background: #fff; border: 2px solid var(--rule); border-radius: 12px; padding: 12px 12px 12px 18px; }
-  .cmd code { white-space: nowrap; }
-  .cmd button { font: 600 14px var(--body); background: var(--paper); color: var(--ink); border: 2px solid var(--rule); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
-  .cmd button:hover { border-color: var(--ink); }
 
   /* a demonstração: o telão e o celular são a peça principal da página */
   .demo { position: relative; margin-top: 40px; padding-bottom: 150px; }
@@ -124,15 +124,40 @@
   .term { background: var(--stage); color: var(--stage-fg); border-radius: 16px; padding: 24px 26px; font: 400 15px/1.75 var(--mono); overflow-x: auto; white-space: pre; box-shadow: 0 24px 50px -24px rgba(18, 24, 32, .55); }
   .term .p { color: var(--glow); }
   .term .d { color: var(--stage-muted); }
+  .shell { display: grid; gap: 14px; justify-items: start; min-width: 0; }
+  .shell .term { width: 100%; }
+  .shell button { font: 600 16px var(--body); color: var(--paper); background: var(--ink); border: 2px solid var(--ink); border-radius: 12px; padding: 12px 22px; cursor: pointer; }
+  .shell button:hover { background: #000; }
+  .after { margin-top: 40px; max-width: 40em; color: var(--soft); }
+  .after code { font: 500 .9em var(--mono); background: #fff; border: 1px solid var(--rule); border-radius: 6px; padding: 2px 6px; white-space: nowrap; }
+
+  /* antes e depois: a dor à esquerda, o que muda à direita */
+  .shift { margin-top: 46px; border-top: 2px solid var(--ink); }
+  .shift div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 8px 56px; padding: 24px 0; border-bottom: 1px solid var(--rule); align-items: baseline; }
+  .shift dt { color: var(--soft); font-size: 19px; }
+  .shift dd { margin: 0; font: 700 22px/1.3 var(--display); letter-spacing: -.01em; }
+  .shift dd span { display: block; margin-top: 6px; font: 400 17px/1.5 var(--body); letter-spacing: 0; color: var(--soft); }
+
+  .proof { margin-top: 56px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; }
+  .proof b { display: block; font: 800 clamp(48px, 6vw, 76px)/1 var(--display); letter-spacing: -.03em; color: var(--loop); }
+  .proof span { display: block; margin-top: 10px; color: var(--soft); max-width: 18em; }
+
+  .faq { margin-top: 46px; border-top: 2px solid var(--ink); max-width: 860px; }
+  .faq details { border-bottom: 1px solid var(--rule); }
+  .faq summary { list-style: none; cursor: pointer; padding: 22px 44px 22px 0; position: relative; font: 700 22px/1.25 var(--display); letter-spacing: -.01em; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; position: absolute; right: 4px; top: 16px; font: 500 30px/1 var(--body); color: var(--loop); }
+  .faq details[open] summary::after { content: "−"; }
+  .faq p { padding: 0 44px 24px 0; color: var(--soft); }
+
+  .close { text-align: left; }
+  .close h2 { max-width: 18ch; }
 
   .list { margin: 46px 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 64px; border-top: 2px solid var(--ink); }
   .list div { padding: 22px 0; border-bottom: 1px solid var(--rule); }
   .list dt { font: 700 22px var(--display); letter-spacing: -.01em; }
   .list dd { margin: 6px 0 0; color: var(--soft); }
 
-  .plain { margin-top: 40px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 64px; }
-  .plain h3 { font-size: 24px; font-weight: 700; }
-  .plain p { margin-top: 8px; color: var(--soft); }
 
   .author { margin-top: 110px; background: var(--stage); color: var(--stage-fg); }
   .author .wrap { padding-top: 84px; padding-bottom: 84px; display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 56px; align-items: center; }
@@ -150,10 +175,13 @@
   @media (max-width: 900px) {
     .demo { padding-bottom: 0; }
     .phone { position: relative; margin: 24px auto 0; }
-    .views, .start, .list, .plain, .author .wrap { grid-template-columns: minmax(0, 1fr); }
+    .views, .start, .list, .author .wrap, .shift div, .proof { grid-template-columns: minmax(0, 1fr); }
+    .proof { gap: 28px; }
+    .mark { white-space: nowrap; }
+    .top, .top nav { gap: 12px; }
+    .faq summary { font-size: 20px; }
     .views .tall { max-width: 260px; }
     .top nav a.hide { display: none; }
-    .cmd { font-size: 14px; gap: 8px; padding-left: 12px; }
     section { padding-top: 80px; }
   }
   @media (prefers-reduced-motion: reduce) {
@@ -172,6 +200,7 @@
     <nav>
       <a class="hide" href="#comecar" data-i18n="navStart">Como começar</a>
       <a class="hide" href="#recursos" data-i18n="navFeatures">Recursos</a>
+      <a class="hide" href="#duvidas" data-i18n="navFaq">Dúvidas</a>
       <a href="https://github.com/codeinloop/talkinloop">GitHub</a>
       <button class="lang" id="lang" type="button" aria-label="Switch to English">English</button>
     </nav>
@@ -179,16 +208,19 @@
 
   <main>
     <div class="hero">
+      <p class="kicker" data-i18n="kicker">Slides de código aberto para quem palestra</p>
       <h1 data-i18n="h1">A plateia entra na palestra pelo celular.</h1>
-      <p class="sub" data-i18n="sub">Quem assiste escaneia o QR, reage, vota e recebe os links que você cita, em tempo real. Você passa os slides pelo celular. Código aberto, roda no seu notebook.</p>
+      <p class="sub" data-i18n="sub">Quem assiste escaneia o QR do slide, reage, vota e recebe os links que você cita, em tempo real. Você passa os slides pelo celular, com o roteiro e o cronômetro na mão.</p>
       <div class="actions">
-        <a class="btn solid" href="https://github.com/codeinloop/talkinloop" data-i18n="ctaRepo">Ver o código no GitHub</a>
-        <span class="cmd"><code>docker compose up --build</code><button type="button" id="copy" data-i18n="copy">Copiar</button></span>
+        <a class="btn solid" href="#comecar" data-i18n="ctaRun">Rodar no meu notebook</a>
+        <a class="btn line" href="https://github.com/codeinloop/talkinloop"><span data-i18n="ctaRepo">Ver no GitHub</span><span class="stars" data-stars hidden></span></a>
+        <button class="btn line" type="button" id="share" data-i18n="share" hidden>Enviar o link para mim</button>
       </div>
+      <p class="trigger" data-i18n="trigger">Grátis e de código aberto. Sem conta para você, sem cadastro para a plateia. Só precisa de Docker.</p>
 
       <div class="demo" id="demo">
         <div class="screen">
-          <img id="slide" src="assets/slide-titulo.webp" width="1280" height="720" alt="Slide de título da apresentação inicial, com o QR code da plateia" data-i18n-alt="slideAlt">
+          <img id="slide" src="assets/slide-titulo.webp" width="1280" height="720" fetchpriority="high" alt="Slide de título da apresentação inicial, com o QR code da plateia" data-i18n-alt="slideAlt">
           <div class="rise" id="rise" aria-hidden="true"></div>
           <div class="score" id="score" role="status" hidden>
             <span>👍</span><b id="up">0</b>
@@ -202,8 +234,6 @@
           <button type="button" id="next" data-i18n="next">Avançar</button>
           <button type="button" id="poll" aria-pressed="false" data-i18n="openPoll">Abrir votação</button>
         </div>
-        <p class="note" data-i18n="note">Isto é uma demonstração: aqui só você reage. Na palestra, é a sala inteira, e o servidor junta tudo em lotes para o telão não travar.</p>
-
         <div class="phone" aria-label="Celular da plateia" data-i18n-aria="phoneLabel">
           <header>
             <div class="live"><i></i><span data-i18n="live">ao vivo</span></div>
@@ -222,8 +252,25 @@
             <button type="button" aria-label="mente explodindo">🤯</button>
           </footer>
         </div>
+        <p class="note" data-i18n="note">Isto é uma demonstração: aqui só você reage. Na palestra, é a sala inteira, e o servidor junta tudo em lotes para o telão não travar.</p>
       </div>
     </div>
+
+    <section id="porque">
+      <h2 data-i18n="whyTitle">O celular já está na mão da plateia.</h2>
+      <p class="lede" data-i18n="whyLede">Hoje ele compete com você. Aqui ele vira parte da palestra.</p>
+      <dl class="shift">
+        <div><dt data-i18n="w1a">“Alguma pergunta?” e a sala em silêncio.</dt><dd data-i18n="w1b">A sala responde 👍 ou 👎 em segundos.<span>Você pergunta em voz alta, em qualquer slide, e o placar aparece no telão.</span></dd></div>
+        <div><dt data-i18n="w2a">Gente fotografando o slide para pegar um link.</dt><dd data-i18n="w2b">O link chega no celular de quem assiste.<span>Aparece quando você chega no slide e fica lá até o fim da palestra.</span></dd></div>
+        <div><dt data-i18n="w3a">Você não sabe se a sala está com você.</dt><dd data-i18n="w3b">As reações sobem no telão na hora.<span>Depois, as métricas mostram quais slides mais mexeram com a sala e quais links foram abertos.</span></dd></div>
+        <div><dt data-i18n="w4a">Uma ferramenta de enquete em outra aba.</dt><dd data-i18n="w4b">A interação mora dentro do próprio deck.<span>Não tem aba para trocar, conta para criar nem plano para assinar.</span></dd></div>
+      </dl>
+      <div class="proof">
+        <div><b>200</b><span data-i18n="pr1">celulares reagindo ao mesmo tempo no teste de carga, sem travar o telão.</span></div>
+        <div><b>4/s</b><span data-i18n="pr2">é o máximo de mensagens que cada celular recebe: as reações vão em lote.</span></div>
+        <div><b>0</b><span data-i18n="pr3">contas para criar. Nem você, nem a plateia.</span></div>
+      </div>
+    </section>
 
     <section>
       <h2 data-i18n="viewsTitle">Três telas, cada pessoa com a sua.</h2>
@@ -245,31 +292,27 @@
     </section>
 
     <section id="comecar">
-      <h2 data-i18n="startTitle">Sobe com um comando.</h2>
-      <p class="lede" data-i18n="startLede">Você precisa de Docker. Não precisa de conta em lugar nenhum, nem de domínio.</p>
+      <h2 data-i18n="startTitle">Do clone ao palco em três passos.</h2>
+      <p class="lede" data-i18n="startLede">Você precisa de Git e Docker. Não precisa de conta em lugar nenhum, nem de domínio.</p>
       <div class="start">
         <ol>
-          <li><b data-i18n="s1t">Rode o comando</b><span data-i18n="s1">Ele sobe o servidor com os slides dentro e abre um túnel gratuito do Cloudflare.</span></li>
+          <li><b data-i18n="s1t">Clone e suba</b><span data-i18n="s1">Ele sobe o servidor com os slides dentro e abre um túnel gratuito do Cloudflare.</span></li>
           <li><b data-i18n="s2t">Abra o link do palco</b><span data-i18n="s2">No notebook ligado ao projetor. O QR da plateia aparece nos slides sozinho.</span></li>
           <li><b data-i18n="s3t">Aponte o celular para o terminal</b><span data-i18n="s3">O QR impresso ali abre o passador. Quem tem esse link comanda os slides.</span></li>
         </ol>
-        <div class="term" aria-label="Saída do terminal"><span class="d">$</span> docker compose up --build
+        <div class="shell">
+        <div class="term" aria-label="Saída do terminal"><span class="d">$</span> git clone https://github.com/codeinloop/talkinloop
+<span class="d">$</span> cd talkinloop
+<span class="d">$</span> docker compose up --build
 
   <span class="p">palco</span>     http://localhost:8080/apresentador/?token=…
   <span class="p">plateia</span>   https://quatro-palavras.trycloudflare.com
   <span class="p">passador</span>  https://quatro-palavras.trycloudflare.com/…
   <span class="p">métricas</span>  http://localhost:8080/apresentador/metricas</div>
-      </div>
-      <div class="plain">
-        <div>
-          <h3 data-i18n="p1t">O túnel tem limite</h3>
-          <p data-i18n="p1">O túnel rápido do Cloudflare aguenta 200 requisições ao mesmo tempo e troca de endereço a cada subida. Para sala grande ou endereço fixo, o mesmo comando aceita um túnel nomeado. <a href="https://youtu.be/mKwYfgOIAYg">Neste vídeo eu explico como o túnel funciona.</a></p>
-        </div>
-        <div>
-          <h3 data-i18n="p2t">Sem internet, o show continua</h3>
-          <p data-i18n="p2">Os slides e os vídeos saem do seu notebook. Se a rede do evento cair, você segue apresentando; só a plateia fica sem reagir.</p>
+        <button type="button" id="copy" data-i18n="copy">Copiar os comandos</button>
         </div>
       </div>
+      <p class="after" data-i18n="after">O que sobe é a apresentação inicial, com um slide para cada recurso. Para a sua, <code>npm run new -- minha-palestra</code> copia essa base, ou um agente de código migra o seu PowerPoint. <a href="https://github.com/codeinloop/talkinloop/blob/main/README.pt-BR.md#fazer-a-sua-apresentação">O passo a passo está no README.</a></p>
     </section>
 
     <section id="recursos">
@@ -286,6 +329,28 @@
         <div><dt data-i18n="f9t">Slides em React</dt><dd data-i18n="f9">Blocos prontos para listas, cartões, etapas, números, código e vídeo. Exporta em PDF.</dd></div>
         <div><dt data-i18n="f10t">Português e inglês</dt><dd data-i18n="f10">A interface da plateia e do passador segue o idioma da apresentação.</dd></div>
       </dl>
+    </section>
+
+    <section id="duvidas">
+      <h2 data-i18n="faqTitle">Antes de subir no palco.</h2>
+      <div class="faq">
+        <details open><summary data-i18n="q1">Preciso refazer os meus slides?</summary><p data-i18n="a1">Não do zero. O repositório traz uma skill para agentes de código que migra PowerPoint, Google Slides, Keynote, PDF, reveal.js e Markdown, com as notas do apresentador. Ela reescreve o conteúdo nos blocos daqui; não copia o layout antigo caixa por caixa.</p></details>
+        <details><summary data-i18n="q2">Preciso saber React?</summary><p data-i18n="a2">Os slides são um arquivo TSX, mas você monta com blocos prontos: listas, cartões, etapas, números, código e vídeo. Cores e fontes ficam num arquivo de configuração. Se preferir, um agente de código escreve os slides a partir do seu roteiro.</p></details>
+        <details><summary data-i18n="q3">E se a internet do evento cair?</summary><p data-i18n="a3">Você segue apresentando. Os slides e os vídeos saem do seu notebook, em localhost; só a plateia fica sem reagir até a rede voltar. O hotspot do celular serve de plano B.</p></details>
+        <details><summary data-i18n="q4">Aguenta uma sala grande?</summary><p data-i18n="a4">O túnel rápido do Cloudflare aceita 200 requisições ao mesmo tempo e troca de endereço a cada subida. Para sala grande ou endereço fixo, o mesmo comando aceita um túnel nomeado, com o seu domínio. <a href="https://youtu.be/mKwYfgOIAYg">Neste vídeo eu explico como o túnel funciona.</a></p></details>
+        <details><summary data-i18n="q5">Alguém da plateia consegue mexer nos meus slides?</summary><p data-i18n="a5">Não. A página da plateia só reage, vota e abre links. Passar slide, abrir votação e ver as métricas exigem o link com token, que só aparece no seu terminal. Por isso, deixe o terminal fora do telão.</p></details>
+        <details><summary data-i18n="q6">A plateia precisa instalar ou se cadastrar?</summary><p data-i18n="a6">Não. É uma página web que abre pelo QR. Nenhum dado pessoal é guardado: o voto único usa um id aleatório salvo no navegador, e o IP não é registrado.</p></details>
+        <details><summary data-i18n="q7">Quanto custa?</summary><p data-i18n="a7">Nada. O código é AGPL-3.0 e roda no seu notebook. Os seus slides são seus, com a licença que você quiser.</p></details>
+      </div>
+    </section>
+
+    <section class="close">
+      <h2 data-i18n="closeTitle">Na próxima palestra, a sala participa.</h2>
+      <div class="actions">
+        <a class="btn solid" href="#comecar" data-i18n="ctaRun">Rodar no meu notebook</a>
+        <a class="btn line" href="https://github.com/codeinloop/talkinloop"><span data-i18n="ctaRepo">Ver no GitHub</span><span class="stars" data-stars hidden></span></a>
+      </div>
+      <p class="trigger" data-i18n="closeTrigger">Três comandos. A primeira subida demora mais, enquanto o Docker monta a imagem.</p>
     </section>
   </main>
 </div>
@@ -317,10 +382,20 @@
 
   // ---- idioma: português no HTML; o inglês troca os textos marcados com data-i18n
   const EN = {
-    navStart: "Getting started", navFeatures: "Features",
+    navStart: "Getting started", navFeatures: "Features", navFaq: "FAQ",
+    kicker: "Open source slides for people who give talks",
     h1: "The audience joins the talk from their phones.",
-    sub: "People scan the QR code, react, vote and get the links you mention, in real time. You drive the slides from your phone. Open source, runs on your laptop.",
-    ctaRepo: "See the code on GitHub", copy: "Copy", copied: "Copied",
+    sub: "People scan the QR code on the slide, react, vote and get the links you mention, in real time. You drive the slides from your phone, with the script and the timer in your hand.",
+    ctaRun: "Run it on my laptop", ctaRepo: "See it on GitHub", share: "Send the link to myself", copy: "Copy the commands", copied: "Copied",
+    trigger: "Free and open source. No account for you, no sign-up for the audience. All you need is Docker.",
+    whyTitle: "The phone is already in the audience's hand.", whyLede: "Today it competes with you. Here it becomes part of the talk.",
+    w1a: "“Any questions?” and the room goes quiet.", w1b: "The room answers 👍 or 👎 in seconds.<span>You ask out loud, on any slide, and the score shows on the big screen.</span>",
+    w2a: "People taking photos of the slide to get a link.", w2b: "The link lands on each person's phone.<span>It shows up when you reach the slide and stays there until the talk ends.</span>",
+    w3a: "You cannot tell if the room is with you.", w3b: "Reactions float up on the big screen right away.<span>Afterwards, the metrics show which slides moved the room and which links were opened.</span>",
+    w4a: "A polling tool in another tab.", w4b: "The interaction lives inside the deck itself.<span>No tab to switch to, no account to create, no plan to pay for.</span>",
+    pr1: "phones reacting at the same time in the load test, without choking the big screen.",
+    pr2: "is the most messages each phone receives: reactions travel in batches.",
+    pr3: "accounts to create. Not for you, not for the audience.",
     you: "You on stage:", prev: "Back", next: "Next", openPoll: "Open poll", closePoll: "Close poll",
     note: "This is a demo: here only you react. In a talk it is the whole room, and the server batches everything so the big screen never chokes.",
     live: "live", phoneTitle: "The title of your talk", now: "on screen now", phoneLabel: "Audience phone",
@@ -329,12 +404,20 @@
     v1t: "The big screen", v1: "The slides, the reactions floating up and the poll score while it is open. It runs on localhost: no dependency on the venue's internet.",
     v2t: "The audience", v2: "Joins through the QR code, nothing to install. Reacts, votes and opens the links on the slide.",
     v3t: "The presenter", v3: "Script, timer, pointer and the next button, all with one hand.",
-    startTitle: "One command to start.", startLede: "You need Docker. No account anywhere, no domain.",
-    s1t: "Run the command", s1: "It starts the server with the slides inside and opens a free Cloudflare tunnel.",
+    startTitle: "From clone to stage in three steps.", startLede: "You need Git and Docker. No account anywhere, no domain.",
+    s1t: "Clone and start", s1: "It starts the server with the slides inside and opens a free Cloudflare tunnel.",
     s2t: "Open the stage link", s2: "On the laptop connected to the projector. The audience QR code shows up on the slides by itself.",
     s3t: "Point your phone at the terminal", s3: "The QR code printed there opens the remote. Whoever has that link controls the slides.",
-    p1t: "The tunnel has a limit", p1: "The Cloudflare Quick Tunnel handles 200 requests at once and changes address every time. For a large room or a fixed address, the same command takes a named tunnel. <a href=\"https://youtu.be/mKwYfgOIAYg\">This video explains how the tunnel works</a> (in Portuguese).",
-    p2t: "No internet, the show goes on", p2: "Slides and videos come from your laptop. If the venue network drops, you keep presenting; only the audience stops reacting.",
+    after: "What starts is the starter talk, with one slide for each feature. For your own, <code>npm run new -- my-talk</code> copies that base, or a coding agent migrates your PowerPoint. <a href=\"https://github.com/codeinloop/talkinloop#make-your-own-talk\">The steps are in the README.</a>",
+    faqTitle: "Before you go on stage.",
+    q1: "Do I have to redo my slides?", a1: "Not from scratch. The repository ships a skill for coding agents that migrates PowerPoint, Google Slides, Keynote, PDF, reveal.js and Markdown, speaker notes included. It rewrites the content with the blocks used here; it does not copy the old layout box by box.",
+    q2: "Do I need to know React?", a2: "The slides are a TSX file, but you build them from ready-made blocks: lists, cards, steps, numbers, code and video. Colors and fonts live in a config file. If you prefer, a coding agent writes the slides from your outline.",
+    q3: "What if the venue's internet drops?", a3: "You keep presenting. Slides and videos come from your laptop, on localhost; only the audience stops reacting until the network is back. A phone hotspot works as plan B.",
+    q4: "Can it handle a large room?", a4: "The Cloudflare Quick Tunnel takes 200 requests at once and changes address every time it starts. For a large room or a fixed address, the same command takes a named tunnel, on your own domain. <a href=\"https://youtu.be/mKwYfgOIAYg\">This video explains how the tunnel works</a> (in Portuguese).",
+    q5: "Can someone in the audience mess with my slides?", a5: "No. The audience page only reacts, votes and opens links. Changing slides, opening a poll and reading the metrics require the link with the token, which only shows in your terminal. So keep the terminal off the big screen.",
+    q6: "Does the audience have to install anything or sign up?", a6: "No. It is a web page that opens from the QR code. No personal data is stored: the one-vote rule uses a random id kept in the browser, and the IP is not recorded.",
+    q7: "How much does it cost?", a7: "Nothing. The code is AGPL-3.0 and runs on your laptop. Your slides are yours, under any license you want.",
+    closeTitle: "At your next talk, the room takes part.", closeTrigger: "Three commands. The first start takes longer, while Docker builds the image.",
     featTitle: "What comes with it.",
     f1t: "Reactions on the big screen", f1: "You choose the emojis. An optional bot claps when the room goes quiet.",
     f2t: "A poll on any slide", f2: "You ask out loud, the room answers 👍 or 👎, one vote per phone.",
@@ -436,8 +519,23 @@
   }, { threshold: 0.4 }).observe($("demo"));
 
   $("copy").addEventListener("click", async () => {
-    try { await navigator.clipboard.writeText("docker compose up --build"); $("copy").textContent = t("copied"); setTimeout(() => { $("copy").textContent = t("copy"); }, 1600); } catch {}
+    try { await navigator.clipboard.writeText("git clone https://github.com/codeinloop/talkinloop\ncd talkinloop\ndocker compose up --build\n"); $("copy").textContent = t("copied"); setTimeout(() => { $("copy").textContent = t("copy"); }, 1600); } catch {}
   });
+
+  // quem chega pelo celular, no meio de uma palestra, não vai rodar Docker agora: manda o link para depois
+  if (navigator.share && matchMedia("(pointer: coarse)").matches) {
+    $("share").hidden = false;
+    $("share").addEventListener("click", () => { navigator.share({ title: "Talk in Loop", url: "https://talkinloop.codeinloop.com.br/" }).catch(() => {}); });
+  }
+
+  // as estrelas só aparecem quando já ajudam a decidir
+  fetch("https://api.github.com/repos/codeinloop/talkinloop").then((r) => (r.ok ? r.json() : null)).then((repo) => {
+    if (!repo || !(repo.stargazers_count >= 25)) return;
+    document.querySelectorAll("[data-stars]").forEach((el) => { el.textContent = "★ " + repo.stargazers_count; el.hidden = false; });
+  }).catch(() => {});
+
+  // os outros slides da demonstração, para a troca não piscar
+  addEventListener("load", () => SLIDES.slice(1).forEach((s) => { new Image().src = `assets/${s.file}.webp`; }));
 
   const wanted = new URLSearchParams(location.search).get("lang");
   setLang(wanted === "en" || (!wanted && !navigator.language.toLowerCase().startsWith("pt")) ? "en" : "pt");

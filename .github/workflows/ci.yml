@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deck:
+    name: Deck (tipos e build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: deck
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: deck/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+
+  backstage:
+    name: Backstage (tipos e testes)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backstage
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22 # o servidor roda os .ts direto: precisa do 22.18 ou mais novo
+          cache: npm
+          cache-dependency-path: backstage/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+
+  image:
+    name: Imagem Docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -f backstage/Dockerfile -t talkinloop:ci .
+      - name: Smoke test
+        run: |
+          docker run -d --name app -p 8080:8080 talkinloop:ci
+          for i in $(seq 1 30); do curl -fs http://localhost:8080/healthz && break; sleep 1; done
+          curl -fs http://localhost:8080/ > /dev/null
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/apresentador/)" = 401
+          docker logs app

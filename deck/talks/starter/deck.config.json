@@ -1,0 +1,52 @@
+{
+  "title": "Título da sua apresentação",
+  "description": "Uma frase sobre a apresentação (aparece em buscas e ao compartilhar o link).",
+  "event": "Nome do evento",
+  "lang": "pt-BR",
+  "timeZone": "America/Sao_Paulo",
+  "author": { "name": "Seu Nome", "tagline": "seu-site.com" },
+  "publicUrl": "",
+  "sourceUrl": "https://github.com/codeinloop/talkinloop",
+  "reactions": [
+    { "id": "clap", "emoji": "👏", "label": "palmas" },
+    { "id": "heart", "emoji": "❤️", "label": "coração" },
+    { "id": "fire", "emoji": "🔥", "label": "fogo" },
+    { "id": "mind", "emoji": "🤯", "label": "mente explodindo" }
+  ],
+  "theme": {
+    "fontsUrl": "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap",
+    "fonts": { "display": "Bricolage Grotesque", "body": "IBM Plex Sans", "mono": "IBM Plex Mono" },
+    "dark": {
+      "bg": "#101418",
+      "bgGlow": "#18212b",
+      "surface": "#182029",
+      "fg": "#eef2f6",
+      "muted": "#a8b3c0",
+      "line": "#344150",
+      "accent": "#5ec2f2",
+      "accentInk": "#0b1016",
+      "accentSoft": "#16364a",
+      "shine": "rgba(160, 220, 255, .22)",
+      "warn": "#f08a7a",
+      "ok": "#6cc48f",
+      "codeBg": "#0b1016",
+      "codeFg": "#e6edf3"
+    },
+    "light": {
+      "bg": "#f6f8fa",
+      "bgGlow": "#ffffff",
+      "surface": "#ffffff",
+      "fg": "#121820",
+      "muted": "#4a5868",
+      "line": "#cfd8e2",
+      "accent": "#0b6fa8",
+      "accentInk": "#ffffff",
+      "accentSoft": "#d8ecf8",
+      "shine": "rgba(255, 255, 255, .7)",
+      "warn": "#b03e28",
+      "ok": "#2f7d4f",
+      "codeBg": "#17202b",
+      "codeFg": "#e6edf3"
+    }
+  }
+}

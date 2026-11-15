@@ -1,0 +1,60 @@
+name: Bug
+description: Something does not work as it should / Algo não funciona como deveria
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: English or Portuguese, as you prefer. Pode escrever em português.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected and what you got. Paste the terminal output if there is any, without the `?token=` part.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. docker compose up --build
+        2. Open the stage link
+        3. ...
+    validations:
+      required: true
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where does it happen?
+      multiple: true
+      options:
+        - Slides on the big screen
+        - Remote on the phone
+        - Audience page
+        - Tunnel or QR code
+        - Metrics
+        - PDF or PNG export
+        - Creating or migrating a talk
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: how
+    attributes:
+      label: How are you running it?
+      options:
+        - docker compose (Quick Tunnel)
+        - docker compose (named tunnel)
+        - Node directly (dev.sh or two terminals)
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Operating system and browser
+      placeholder: Windows 11, Chrome 131; audience on iOS Safari
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
+      description: Screenshots, the size of the audience, whether it is the starter talk or your own.

@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#13181f">
+<title>{{title}}</title>
+<style>
+  :root { --bg: #13181f; --surface: #1b222d; --fg: #f2ede2; --muted: #b6b0a2; --line: #3a4453; --accent: #e9ad40; --accent-soft: #3d3117; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { background: var(--bg); color: var(--fg); font: 17px/1.45 ui-sans-serif, system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; display: grid; grid-template-rows: auto 1fr auto; min-height: 100dvh; }
+  header { padding: 20px 20px 8px; }
+  header small:empty { display: none; }
+  header small { display: block; font: 600 12px ui-monospace, Menlo, monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+  header h1 { margin: 4px 0 0; font-size: 22px; line-height: 1.15; font-weight: 800; letter-spacing: -.01em; }
+  header .now { margin-top: 10px; padding: 10px 12px; border-left: 4px solid var(--accent); color: var(--muted); font-size: 15px; }
+  header .now b { color: var(--fg); display: block; font-size: 17px; }
+  main { padding: 8px 20px 20px; overflow: auto; }
+  h2 { font: 600 12px ui-monospace, Menlo, monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 18px 0 8px; }
+  .links { display: grid; gap: 8px; }
+  .links a { display: block; padding: 14px 16px; background: var(--surface); border: 2px solid var(--line); border-radius: 12px; color: var(--fg); text-decoration: none; font-weight: 600; }
+  .links a:active { border-color: var(--accent); }
+  .links a small { display: block; color: var(--muted); font-weight: 400; font-size: 13px; word-break: break-all; }
+  .links .empty { color: var(--muted); font-size: 15px; }
+  .tela { margin: 6px 0 10px; animation: pop .35s ease-out both; }
+  .tela[hidden] { display: none; }
+  .tela button { display: block; width: 100%; padding: 0; background: none; border: 2px solid var(--accent); border-radius: 12px; overflow: hidden; }
+  .tela img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: contain; background: var(--bg); }
+  .tela small { display: block; margin-top: 4px; color: var(--muted); font-size: 13px; }
+  .zoom { position: fixed; inset: 0; z-index: 10; background: #000; overflow: auto; -webkit-overflow-scrolling: touch; }
+  .zoom[hidden] { display: none; }
+  .zoom img { display: block; width: 260%; max-width: none; }
+  .zoom button { position: fixed; top: calc(10px + env(safe-area-inset-top)); right: 12px; padding: 10px 16px; font-size: 16px; font-weight: 700; color: #000; background: var(--accent); border: 0; border-radius: 999px; }
+  .vote { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 6px 0 10px; animation: pop .35s ease-out both; }
+  .vote[hidden] { display: none; }
+  .vote button { font-size: 52px; line-height: 1; padding: 22px 0; background: var(--surface); border: 3px solid var(--line); border-radius: 18px; touch-action: manipulation; user-select: none; -webkit-user-select: none; transition: transform .1s; }
+  .vote button:active { transform: scale(.94); }
+  .vote button.on { border-color: var(--accent); background: var(--accent-soft); }
+  @keyframes pop { from { opacity: 0; transform: scale(.96); } }
+  footer { padding: 12px 16px calc(14px + env(safe-area-inset-bottom)); background: var(--surface); border-top: 2px solid var(--line); display: grid; grid-template-columns: repeat(var(--n, 4), 1fr); gap: 10px; position: sticky; bottom: 0; }
+  footer button { font-size: 34px; line-height: 1; padding: 14px 0; background: var(--bg); border: 2px solid var(--line); border-radius: 16px; color: var(--fg); touch-action: manipulation; user-select: none; -webkit-user-select: none; transition: transform .1s; }
+  footer button:active { transform: scale(.9); border-color: var(--accent); }
+  .source { margin: 28px 0 0; font-size: 13px; }
+  .source[hidden] { display: none; }
+  .source a { color: var(--muted); }
+  .status { position: fixed; top: 10px; right: 12px; font: 500 12px ui-monospace, Menlo, monospace; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .status i { width: 8px; height: 8px; border-radius: 50%; background: #e36b5f; display: inline-block; }
+  .status.on i { background: #6cc48f; }
+  .fly { position: fixed; bottom: 110px; font-size: 40px; pointer-events: none; animation: fly 1.6s ease-out forwards; }
+  @keyframes fly { to { transform: translateY(-50vh) scale(1.4); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .fly { animation-duration: .4s; } }
+</style>
+<style>{{theme}}</style>
+</head>
+<body>
+  <div class="status" id="status"><i></i><span id="conn">{{t.connecting}}</span></div>
+  <header>
+    <small>{{event}}</small>
+    <h1>{{title}}</h1>
+    <div class="now"><span>{{t.nowOnScreen}}</span><b id="slide">—</b></div>
+  </header>
+  <main>
+    <div class="tela" id="tela" hidden>
+      <button id="tela-open" aria-label="{{t.openScreen}}"><img id="tela-img" alt="{{t.screenAlt}}"></button>
+      <small>{{t.tapToZoom}}</small>
+    </div>
+    <div class="vote" id="vote" hidden>
+      <button data-choice="up" aria-label="{{t.yes}}">👍</button>
+      <button data-choice="down" aria-label="{{t.no}}">👎</button>
+    </div>
+    <h2>{{t.links}}</h2>
+    <div class="links" id="links"><div class="empty">{{t.linksEmpty}}</div></div>
+    <p class="source" id="source" hidden><a target="_blank" rel="noopener">{{t.source}}</a></p>
+    <p class="source"><a href="https://talkinloop.codeinloop.com.br" target="_blank" rel="noopener">{{t.poweredBy}}</a></p>
+  </main>
+  <footer id="reactions"></footer>
+  <div class="zoom" id="zoom" hidden>
+    <img id="zoom-img" alt="{{t.zoomAlt}}">
+    <button id="zoom-close">{{t.close}}</button>
+  </div>
+<script>
+  const CONFIG = {{config}};
+  const EMOJI = Object.fromEntries(CONFIG.reactions.map((r) => [r.id, r.emoji]));
+  const $ = (id) => document.getElementById(id);
+  $("reactions").style.setProperty("--n", CONFIG.reactions.length);
+  $("reactions").replaceChildren(...CONFIG.reactions.map((r) => {
+    const b = document.createElement("button");
+    b.dataset.kind = r.id; b.textContent = r.emoji; b.setAttribute("aria-label", r.label);
+    return b;
+  }));
+  if (/^https?:\/\//i.test(CONFIG.sourceUrl)) { $("source").hidden = false; $("source").firstElementChild.href = CONFIG.sourceUrl; }
+  let ws, lastMsg = 0, retry, poll = { id: 0, open: false }, telaV = 0;
+  const store = { get: (k) => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+  const cid = store.get("cid") || (() => { const c = Math.random().toString(36).slice(2) + Date.now().toString(36); store.set("cid", c); return c; })();
+
+  function connect() {
+    clearTimeout(retry);
+    if (ws && (ws.readyState === 0 || ws.readyState === 1)) return;
+    ws = new WebSocket((location.protocol === "https:" ? "wss://" : "ws://") + location.host + "/ws?cid=" + cid);
+    ws.onopen = () => { lastMsg = Date.now(); $("status").classList.add("on"); $("conn").textContent = CONFIG.t.live; };
+    ws.onclose = () => { $("status").classList.remove("on"); $("conn").textContent = CONFIG.t.reconnecting; retry = setTimeout(connect, 2500); };
+    ws.onerror = () => ws.close();
+    ws.onmessage = (e) => {
+      lastMsg = Date.now();
+      const m = JSON.parse(e.data);
+      if (m.type === "state") render(m.state);
+      if (m.type === "burst") burst(m);
+    };
+  }
+  function resync() {
+    fetch("/state").then((r) => r.json()).then(render).catch(() => {});
+    // socket ainda conectando (readyState 0) fica quieto: derrubá-lo aqui atrasava a entrada de todo
+    // mundo, porque pageshow e focus disparam logo ao abrir a página
+    const stale = ws && ws.readyState === 1 && Date.now() - lastMsg > 30000;
+    if (!ws || ws.readyState > 1 || stale) { try { ws && ws.close(); } catch {} connect(); }
+  }
+  setInterval(() => { if (ws && ws.readyState === 1 && Date.now() - lastMsg > 30000) ws.close(); }, 5000);
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") resync(); });
+  window.addEventListener("pageshow", resync);
+  window.addEventListener("online", resync);
+  window.addEventListener("focus", resync);
+  function render(s) {
+    $("slide").textContent = s.slide.title || "—";
+    const links = $("links");
+    // links vêm do deck: monta com textContent e só aceita http(s), nunca HTML cru
+    const safe = s.links.filter((l) => /^https?:\/\//i.test(l.url));
+    if (safe.length) links.replaceChildren(...safe.map((l) => {
+      const a = document.createElement("a");
+      a.href = l.url; a.target = "_blank"; a.rel = "noopener";
+      a.dataset.url = l.url; // a.href vem normalizado (barra no fim etc.); a métrica usa o original
+      a.textContent = l.label;
+      const small = document.createElement("small");
+      small.textContent = l.url.replace(/^https?:\/\//i, "");
+      a.append(small);
+      return a;
+    }));
+    const share = s.share || { on: false, v: 0 };
+    const v = share.on ? share.v : 0;
+    if (v !== telaV) {
+      const first = !telaV && v;
+      telaV = v;
+      $("tela").hidden = !v;
+      if (v) { $("tela-img").src = "/tela.jpg?v=" + v; if (!$("zoom").hidden) $("zoom-img").src = "/tela.jpg?v=" + v; }
+      else $("zoom").hidden = true;
+      if (first && navigator.vibrate) navigator.vibrate(30);
+    }
+    const opened = s.poll.open && !poll.open;
+    poll = s.poll;
+    $("vote").hidden = !poll.open;
+    markVote();
+    if (opened && navigator.vibrate) navigator.vibrate(30);
+  }
+  function markVote() {
+    const mine = store.get("vote");
+    const choice = mine && mine.id === poll.id ? mine.choice : null;
+    document.querySelectorAll("#vote button").forEach((b) => b.classList.toggle("on", b.dataset.choice === choice));
+  }
+  $("tela-open").addEventListener("click", () => {
+    $("zoom-img").src = $("tela-img").src;
+    $("zoom").hidden = false;
+    requestAnimationFrame(() => { const z = $("zoom"); z.scrollLeft = (z.scrollWidth - z.clientWidth) / 2; z.scrollTop = (z.scrollHeight - z.clientHeight) / 2; });
+  });
+  $("zoom-close").addEventListener("click", () => { $("zoom").hidden = true; });
+  $("links").addEventListener("click", (e) => {
+    const a = e.target.closest("a[data-url]");
+    if (a && ws && ws.readyState === 1) ws.send(JSON.stringify({ type: "click", url: a.dataset.url }));
+  });
+  document.querySelectorAll("#vote button").forEach((b) => b.addEventListener("click", () => {
+    if (!poll.open || !ws || ws.readyState !== 1) return;
+    ws.send(JSON.stringify({ type: "vote", choice: b.dataset.choice, cid }));
+    store.set("vote", { id: poll.id, choice: b.dataset.choice });
+    markVote();
+    if (navigator.vibrate) navigator.vibrate(12);
+  }));
+  const PER_BURST = 4, MAX_FLYING = 24;
+  let flying = 0;
+  function sample(counts, max) {
+    const bag = [];
+    for (const k in counts) for (let i = 0; i < Math.min(counts[k], max); i++) bag.push(k);
+    for (let i = bag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [bag[i], bag[j]] = [bag[j], bag[i]]; }
+    return bag.slice(0, max);
+  }
+  function burst(m) {
+    for (const k of sample(m.h || {}, PER_BURST)) setTimeout(() => fly(k), Math.random() * 250);
+  }
+  function fly(kind) {
+    if (flying >= MAX_FLYING) return;
+    flying++;
+    setTimeout(() => flying--, 1700);
+    const el = document.createElement("span");
+    el.className = "fly";
+    el.textContent = EMOJI[kind] || CONFIG.reactions[0].emoji;
+    el.style.left = (10 + Math.random() * 70) + "%";
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1700);
+  }
+  document.querySelectorAll("footer button").forEach((b) => b.addEventListener("click", () => {
+    if (ws && ws.readyState === 1) ws.send(JSON.stringify({ type: "react", kind: b.dataset.kind }));
+    if (navigator.vibrate) navigator.vibrate(10);
+  }));
+  connect();
+</script>
+</body>
+</html>

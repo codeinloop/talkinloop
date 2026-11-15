@@ -1,0 +1,10 @@
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+slides.pdf
+slides-png/
+/public/
+/components/roteiro.json
+/components/talk.generated.ts

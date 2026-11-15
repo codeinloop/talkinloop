@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Talk in Loop · a plateia entra na palestra pelo celular</title>
+<meta name="description" content="Slides em que a plateia reage, vota e recebe os links pelo celular, em tempo real. Código aberto, roda no seu notebook com um comando.">
+<link rel="canonical" href="https://talkinloop.codeinloop.com.br/">
+<meta property="og:title" content="Talk in Loop">
+<meta property="og:description" content="A plateia entra na palestra pelo celular: reações no telão, votação e links em tempo real.">
+<meta property="og:image" content="https://talkinloop.codeinloop.com.br/assets/telao.webp">
+<meta property="og:url" content="https://talkinloop.codeinloop.com.br/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23101418'/%3E%3Cpath d='M9 16a7 7 0 0 1 12-5m2 5a7 7 0 0 1-12 5' fill='none' stroke='%235ec2f2' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --paper: #f3f5f7;
+    --ink: #121820;
+    --soft: #4a5868;
+    --rule: #cfd8e2;
+    --loop: #0b6fa8;
+    --stage: #101418;
+    --stage-surface: #182029;
+    --stage-line: #344150;
+    --stage-fg: #eef2f6;
+    --stage-muted: #a8b3c0;
+    --glow: #5ec2f2;
+    --display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+    --body: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+    --measure: 1180px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 400 18px/1.55 var(--body); -webkit-font-smoothing: antialiased; }
+  img { max-width: 100%; height: auto; display: block; }
+  a { color: var(--loop); text-underline-offset: 3px; }
+  :focus-visible { outline: 3px solid var(--loop); outline-offset: 3px; border-radius: 4px; }
+  h1, h2, h3 { font-family: var(--display); line-height: 1.04; letter-spacing: -.02em; margin: 0; text-wrap: balance; }
+  p { margin: 0; text-wrap: pretty; }
+  .wrap { max-width: var(--measure); margin: 0 auto; padding: 0 28px; }
+
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 0; }
+  .mark { display: flex; align-items: center; gap: 10px; font: 800 22px var(--display); color: var(--ink); text-decoration: none; letter-spacing: -.02em; }
+  .mark svg { width: 30px; height: 30px; }
+  .top nav { display: flex; align-items: center; gap: 22px; font-size: 16px; }
+  .top nav a { color: var(--ink); text-decoration: none; font-weight: 500; }
+  .top nav a:hover { text-decoration: underline; }
+  .lang { font: 500 15px var(--body); color: var(--ink); background: none; border: 2px solid var(--rule); border-radius: 999px; padding: 5px 14px; cursor: pointer; }
+  .lang:hover { border-color: var(--ink); }
+
+  .hero { padding: 24px 0 0; }
+  .hero h1 { font-size: clamp(40px, 6vw, 84px); font-weight: 800; max-width: 14ch; }
+  .hero .sub { margin-top: 20px; font-size: clamp(19px, 2vw, 24px); max-width: 34em; color: var(--soft); }
+  .actions { margin-top: 30px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+  .btn { display: inline-block; font: 600 17px var(--body); padding: 14px 24px; border-radius: 12px; text-decoration: none; border: 2px solid var(--ink); cursor: pointer; }
+  .btn.solid { background: var(--ink); color: var(--paper); }
+  .btn.solid:hover { background: #000; }
+  .btn.line { background: transparent; color: var(--ink); }
+  .btn.line:hover { background: #fff; }
+  .cmd { display: inline-flex; align-items: center; gap: 14px; font: 500 16px var(--mono); background: #fff; border: 2px solid var(--rule); border-radius: 12px; padding: 12px 12px 12px 18px; }
+  .cmd code { white-space: nowrap; }
+  .cmd button { font: 600 14px var(--body); background: var(--paper); color: var(--ink); border: 2px solid var(--rule); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+  .cmd button:hover { border-color: var(--ink); }
+
+  /* a demonstração: o telão e o celular são a peça principal da página */
+  .demo { position: relative; margin-top: 40px; padding-bottom: 150px; }
+  .screen { position: relative; aspect-ratio: 16 / 9; width: min(100%, 980px); background: var(--stage); border-radius: 22px; overflow: hidden; box-shadow: 0 40px 80px -30px rgba(18, 24, 32, .55), 0 0 0 1px rgba(18, 24, 32, .9); }
+  .screen img { width: 100%; height: 100%; object-fit: cover; }
+  .rise { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .rise span { position: absolute; bottom: -8%; font-size: clamp(26px, 4.4vw, 56px); animation: rise 3.6s ease-out forwards; }
+  @keyframes rise { 0% { transform: translateY(0) scale(.6); opacity: 0; } 12% { opacity: 1; } 100% { transform: translateY(-115%) scale(1.25) rotate(8deg); opacity: 0; } }
+  .score { position: absolute; left: 50%; bottom: 5%; translate: -50% 0; width: min(62%, 560px); display: flex; align-items: center; gap: 12px; padding: 10px 18px; background: rgba(24, 32, 41, .94); border: 2px solid var(--glow); border-radius: 14px; color: var(--stage-fg); font: 800 clamp(16px, 2.4vw, 28px) var(--display); }
+  .score[hidden] { display: none; }
+  .score .bar { flex: 1; height: 10px; border-radius: 5px; background: #f08a7a; overflow: hidden; }
+  .score .bar i { display: block; height: 100%; background: var(--glow); transition: width .4s; }
+  .score .bar.empty { background: var(--stage-line); }
+  .score .bar.empty i { width: 0 !important; }
+
+  .podium { margin-top: 16px; width: min(100%, 980px); display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .podium span { font-size: 15px; color: var(--soft); margin-right: 6px; }
+  .podium button { font: 600 15px var(--body); color: var(--ink); background: #fff; border: 2px solid var(--rule); border-radius: 10px; padding: 9px 16px; cursor: pointer; }
+  .podium button:hover { border-color: var(--ink); }
+  .podium button[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+  .phone { position: absolute; right: 0; bottom: 0; width: 290px; background: var(--stage); color: var(--stage-fg); border-radius: 34px; border: 8px solid #06090c; box-shadow: 0 30px 60px -20px rgba(18, 24, 32, .6); overflow: hidden; font-size: 15px; }
+  .phone header { padding: 18px 18px 6px; }
+  .phone .live { display: flex; align-items: center; gap: 6px; justify-content: flex-end; font: 500 12px var(--mono); color: var(--stage-muted); }
+  .phone .live i { width: 8px; height: 8px; border-radius: 50%; background: #6cc48f; }
+  .phone h3 { font: 800 19px/1.15 var(--body); letter-spacing: -.01em; margin-top: 4px; }
+  .phone .now { margin-top: 10px; padding: 8px 12px; border-left: 4px solid var(--glow); color: var(--stage-muted); font-size: 14px; }
+  .phone .now b { display: block; color: var(--stage-fg); font-size: 16px; }
+  .phone .vote { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 8px 18px 0; }
+  .phone .vote[hidden] { display: none; }
+  .phone .vote button { font-size: 38px; line-height: 1; padding: 14px 0; background: var(--stage-surface); border: 3px solid var(--stage-line); border-radius: 16px; cursor: pointer; }
+  .phone .vote button[aria-pressed="true"] { border-color: var(--glow); background: #16364a; }
+  .phone .hint { padding: 12px 18px 14px; color: var(--stage-muted); font-size: 14px; min-height: 68px; }
+  .phone footer { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 12px 14px 16px; background: var(--stage-surface); border-top: 2px solid var(--stage-line); }
+  .phone footer button { font-size: 28px; line-height: 1; padding: 12px 0; background: var(--stage); border: 2px solid var(--stage-line); border-radius: 14px; cursor: pointer; transition: transform .1s; }
+  .phone footer button:active { transform: scale(.9); border-color: var(--glow); }
+  .note { margin-top: 18px; max-width: 30em; font-size: 15px; color: var(--soft); }
+
+  section { padding: 110px 0 0; }
+  section h2 { font-size: clamp(32px, 4.6vw, 60px); font-weight: 800; max-width: 16ch; }
+  section .lede { margin-top: 18px; max-width: 34em; color: var(--soft); font-size: 20px; }
+
+  .views { margin-top: 48px; display: grid; grid-template-columns: minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1fr); gap: 34px; align-items: end; }
+  .views figure { margin: 0; }
+  .views img { border-radius: 16px; box-shadow: 0 24px 50px -24px rgba(18, 24, 32, .55), 0 0 0 1px rgba(18, 24, 32, .85); }
+  .views .tall img { border-radius: 26px; border: 6px solid #06090c; }
+  .views figcaption { margin-top: 18px; font-size: 17px; color: var(--soft); }
+  .views figcaption b { display: block; font: 700 22px var(--display); color: var(--ink); letter-spacing: -.01em; margin-bottom: 4px; }
+
+  .start { margin-top: 44px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 56px; align-items: start; }
+  .start ol { margin: 0; padding: 0; list-style: none; counter-reset: step; display: grid; gap: 26px; }
+  .start li { counter-increment: step; padding-left: 62px; position: relative; }
+  .start li::before { content: counter(step); position: absolute; left: 0; top: -4px; font: 800 44px/1 var(--display); color: var(--loop); }
+  .start li b { display: block; font: 700 22px var(--display); letter-spacing: -.01em; }
+  .start li span { color: var(--soft); }
+  .term { background: var(--stage); color: var(--stage-fg); border-radius: 16px; padding: 24px 26px; font: 400 15px/1.75 var(--mono); overflow-x: auto; white-space: pre; box-shadow: 0 24px 50px -24px rgba(18, 24, 32, .55); }
+  .term .p { color: var(--glow); }
+  .term .d { color: var(--stage-muted); }
+
+  .list { margin: 46px 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 64px; border-top: 2px solid var(--ink); }
+  .list div { padding: 22px 0; border-bottom: 1px solid var(--rule); }
+  .list dt { font: 700 22px var(--display); letter-spacing: -.01em; }
+  .list dd { margin: 6px 0 0; color: var(--soft); }
+
+  .plain { margin-top: 40px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 64px; }
+  .plain h3 { font-size: 24px; font-weight: 700; }
+  .plain p { margin-top: 8px; color: var(--soft); }
+
+  .author { margin-top: 110px; background: var(--stage); color: var(--stage-fg); }
+  .author .wrap { padding-top: 84px; padding-bottom: 84px; display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 56px; align-items: center; }
+  .author h2 { font-size: clamp(30px, 4vw, 52px); font-weight: 800; max-width: 15ch; }
+  .author p { margin-top: 18px; color: var(--stage-muted); max-width: 30em; }
+  .author a { color: var(--glow); }
+  .author ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; font: 700 26px var(--display); letter-spacing: -.01em; }
+  .author li a { display: block; padding: 12px 0; border-bottom: 1px solid var(--stage-line); color: var(--stage-fg); text-decoration: none; }
+  .author li a:hover { color: var(--glow); }
+  .author li small { display: block; font: 400 15px var(--body); color: var(--stage-muted); letter-spacing: 0; }
+
+  .end { padding: 34px 0 44px; font-size: 15px; color: var(--soft); display: flex; flex-wrap: wrap; gap: 8px 28px; justify-content: space-between; }
+  .end a { color: var(--soft); }
+
+  @media (max-width: 900px) {
+    .demo { padding-bottom: 0; }
+    .phone { position: relative; margin: 24px auto 0; }
+    .views, .start, .list, .plain, .author .wrap { grid-template-columns: minmax(0, 1fr); }
+    .views .tall { max-width: 260px; }
+    .top nav a.hide { display: none; }
+    .cmd { font-size: 14px; gap: 8px; padding-left: 12px; }
+    section { padding-top: 80px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .rise span { animation-duration: 1.2s; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="mark" href="./">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#101418"/><path d="M9 16a7 7 0 0 1 12-5m2 5a7 7 0 0 1-12 5" fill="none" stroke="#5ec2f2" stroke-width="3" stroke-linecap="round"/></svg>
+      Talk in Loop
+    </a>
+    <nav>
+      <a class="hide" href="#comecar" data-i18n="navStart">Como começar</a>
+      <a class="hide" href="#recursos" data-i18n="navFeatures">Recursos</a>
+      <a href="https://github.com/codeinloop/talkinloop">GitHub</a>
+      <button class="lang" id="lang" type="button" aria-label="Switch to English">English</button>
+    </nav>
+  </header>
+
+  <main>
+    <div class="hero">
+      <h1 data-i18n="h1">A plateia entra na palestra pelo celular.</h1>
+      <p class="sub" data-i18n="sub">Quem assiste escaneia o QR, reage, vota e recebe os links que você cita, em tempo real. Você passa os slides pelo celular. Código aberto, roda no seu notebook.</p>
+      <div class="actions">
+        <a class="btn solid" href="https://github.com/codeinloop/talkinloop" data-i18n="ctaRepo">Ver o código no GitHub</a>
+        <span class="cmd"><code>docker compose up --build</code><button type="button" id="copy" data-i18n="copy">Copiar</button></span>
+      </div>
+
+      <div class="demo" id="demo">
+        <div class="screen">
+          <img id="slide" src="assets/slide-titulo.webp" width="1280" height="720" alt="Slide de título da apresentação inicial, com o QR code da plateia" data-i18n-alt="slideAlt">
+          <div class="rise" id="rise" aria-hidden="true"></div>
+          <div class="score" id="score" role="status" hidden>
+            <span>👍</span><b id="up">0</b>
+            <div class="bar empty" id="bar"><i style="width:50%"></i></div>
+            <b id="down">0</b><span>👎</span>
+          </div>
+        </div>
+        <div class="podium">
+          <span data-i18n="you">Você no palco:</span>
+          <button type="button" id="prev" data-i18n="prev">Voltar</button>
+          <button type="button" id="next" data-i18n="next">Avançar</button>
+          <button type="button" id="poll" aria-pressed="false" data-i18n="openPoll">Abrir votação</button>
+        </div>
+        <p class="note" data-i18n="note">Isto é uma demonstração: aqui só você reage. Na palestra, é a sala inteira, e o servidor junta tudo em lotes para o telão não travar.</p>
+
+        <div class="phone" aria-label="Celular da plateia" data-i18n-aria="phoneLabel">
+          <header>
+            <div class="live"><i></i><span data-i18n="live">ao vivo</span></div>
+            <h3 data-i18n="phoneTitle">Título da sua apresentação</h3>
+            <div class="now"><span data-i18n="now">agora na tela</span><b id="now">Título</b></div>
+          </header>
+          <div class="vote" id="vote" hidden>
+            <button type="button" data-choice="up" aria-pressed="false" aria-label="sim">👍</button>
+            <button type="button" data-choice="down" aria-pressed="false" aria-label="não">👎</button>
+          </div>
+          <p class="hint" id="hint" data-i18n="hint">Toque numa reação aqui embaixo e olhe para o telão.</p>
+          <footer id="reactions">
+            <button type="button" aria-label="palmas">👏</button>
+            <button type="button" aria-label="coração">❤️</button>
+            <button type="button" aria-label="fogo">🔥</button>
+            <button type="button" aria-label="mente explodindo">🤯</button>
+          </footer>
+        </div>
+      </div>
+    </div>
+
+    <section>
+      <h2 data-i18n="viewsTitle">Três telas, cada pessoa com a sua.</h2>
+      <p class="lede" data-i18n="viewsLede">Estas são capturas do produto rodando, sem montagem.</p>
+      <div class="views">
+        <figure>
+          <img src="assets/telao.webp" width="1280" height="720" loading="lazy" alt="Slide no telão com reações subindo e o placar da votação: 6 a 1" data-i18n-alt="telaoAlt">
+          <figcaption><b data-i18n="v1t">O telão</b><span data-i18n="v1">Os slides, as reações subindo e o placar da votação enquanto ela está aberta. Roda em localhost: não depende da internet do evento.</span></figcaption>
+        </figure>
+        <figure class="tall">
+          <img src="assets/plateia.webp" width="390" height="780" loading="lazy" alt="Página da plateia no celular: votação, links citados e botões de reação" data-i18n-alt="plateiaAlt">
+          <figcaption><b data-i18n="v2t">A plateia</b><span data-i18n="v2">Entra pelo QR, sem instalar nada. Reage, vota e abre os links do slide.</span></figcaption>
+        </figure>
+        <figure class="tall">
+          <img src="assets/passador.webp" width="390" height="780" loading="lazy" alt="Passador no celular do apresentador: cronômetro, roteiro, prévia do slide e botões" data-i18n-alt="passadorAlt">
+          <figcaption><b data-i18n="v3t">Quem apresenta</b><span data-i18n="v3">Roteiro, cronômetro, ponteiro e os botões de avançar, tudo com uma mão.</span></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="comecar">
+      <h2 data-i18n="startTitle">Sobe com um comando.</h2>
+      <p class="lede" data-i18n="startLede">Você precisa de Docker. Não precisa de conta em lugar nenhum, nem de domínio.</p>
+      <div class="start">
+        <ol>
+          <li><b data-i18n="s1t">Rode o comando</b><span data-i18n="s1">Ele sobe o servidor com os slides dentro e abre um túnel gratuito do Cloudflare.</span></li>
+          <li><b data-i18n="s2t">Abra o link do palco</b><span data-i18n="s2">No notebook ligado ao projetor. O QR da plateia aparece nos slides sozinho.</span></li>
+          <li><b data-i18n="s3t">Aponte o celular para o terminal</b><span data-i18n="s3">O QR impresso ali abre o passador. Quem tem esse link comanda os slides.</span></li>
+        </ol>
+        <div class="term" aria-label="Saída do terminal"><span class="d">$</span> docker compose up --build
+
+  <span class="p">palco</span>     http://localhost:8080/apresentador/?token=…
+  <span class="p">plateia</span>   https://quatro-palavras.trycloudflare.com
+  <span class="p">passador</span>  https://quatro-palavras.trycloudflare.com/…
+  <span class="p">métricas</span>  http://localhost:8080/apresentador/metricas</div>
+      </div>
+      <div class="plain">
+        <div>
+          <h3 data-i18n="p1t">O túnel tem limite</h3>
+          <p data-i18n="p1">O túnel rápido do Cloudflare aguenta 200 requisições ao mesmo tempo e troca de endereço a cada subida. Para sala grande ou endereço fixo, o mesmo comando aceita um túnel nomeado. <a href="https://youtu.be/mKwYfgOIAYg">Neste vídeo eu explico como o túnel funciona.</a></p>
+        </div>
+        <div>
+          <h3 data-i18n="p2t">Sem internet, o show continua</h3>
+          <p data-i18n="p2">Os slides e os vídeos saem do seu notebook. Se a rede do evento cair, você segue apresentando; só a plateia fica sem reagir.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="recursos">
+      <h2 data-i18n="featTitle">O que vem junto.</h2>
+      <dl class="list">
+        <div><dt data-i18n="f1t">Reações no telão</dt><dd data-i18n="f1">Você escolhe os emojis. Um robô opcional bate palma quando a sala fica em silêncio.</dd></div>
+        <div><dt data-i18n="f2t">Votação em qualquer slide</dt><dd data-i18n="f2">Você pergunta em voz alta, a sala responde 👍 ou 👎, um voto por celular.</dd></div>
+        <div><dt data-i18n="f3t">Links por slide</dt><dd data-i18n="f3">Cada fonte que você cita aparece no celular da plateia na hora, e fica lá até o fim.</dd></div>
+        <div><dt data-i18n="f4t">A tela no celular</dt><dd data-i18n="f4">Para quem está longe do telão: o slide atual vai para o celular, com zoom.</dd></div>
+        <div><dt data-i18n="f5t">Passador com ponteiro</dt><dd data-i18n="f5">Arraste o dedo na prévia e um laser, ou um holofote, aparece no telão.</dd></div>
+        <div><dt data-i18n="f6t">Métricas depois</dt><dd data-i18n="f6">Pico de gente, reações por slide, votos e cliques em cada link. Sem guardar dado pessoal.</dd></div>
+        <div><dt data-i18n="f7t">Tema sem tocar em CSS</dt><dd data-i18n="f7">Cores e fontes num arquivo de configuração, com tema claro e escuro.</dd></div>
+        <div><dt data-i18n="f8t">Traga a sua apresentação</dt><dd data-i18n="f8">Uma skill para agentes de código migra PowerPoint, Google Slides e Keynote, com as notas do apresentador.</dd></div>
+        <div><dt data-i18n="f9t">Slides em React</dt><dd data-i18n="f9">Blocos prontos para listas, cartões, etapas, números, código e vídeo. Exporta em PDF.</dd></div>
+        <div><dt data-i18n="f10t">Português e inglês</dt><dd data-i18n="f10">A interface da plateia e do passador segue o idioma da apresentação.</dd></div>
+      </dl>
+    </section>
+  </main>
+</div>
+
+<div class="author">
+  <div class="wrap">
+    <div>
+      <h2 data-i18n="authorTitle">Criado por Danilo Dorgam, do Code in Loop.</h2>
+      <p data-i18n="authorText">Nasceu para uma palestra no DevOpsDays Brasília 2026 e virou projeto aberto porque o pessoal pediu. Eu escrevo e gravo sobre desenvolvimento, DevOps e homelab. Se você apresentar com ele, me conta.</p>
+    </div>
+    <ul>
+      <li><a href="https://codeinloop.com.br/links">Code in Loop<small data-i18n="l1">todos os links</small></a></li>
+      <li><a href="https://www.youtube.com/@codeinloopbr">YouTube<small>@codeinloopbr</small></a></li>
+      <li><a href="https://www.instagram.com/danilodorgam">Instagram<small>@danilodorgam</small></a></li>
+      <li><a href="https://www.linkedin.com/in/danilodorgam/">LinkedIn<small>Danilo Dorgam</small></a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="wrap">
+  <footer class="end">
+    <span data-i18n="license">Código sob AGPL-3.0. Os seus slides são seus, com qualquer licença.</span>
+    <span><a href="https://github.com/codeinloop/talkinloop">github.com/codeinloop/talkinloop</a></span>
+  </footer>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  // ---- idioma: português no HTML; o inglês troca os textos marcados com data-i18n
+  const EN = {
+    navStart: "Getting started", navFeatures: "Features",
+    h1: "The audience joins the talk from their phones.",
+    sub: "People scan the QR code, react, vote and get the links you mention, in real time. You drive the slides from your phone. Open source, runs on your laptop.",
+    ctaRepo: "See the code on GitHub", copy: "Copy", copied: "Copied",
+    you: "You on stage:", prev: "Back", next: "Next", openPoll: "Open poll", closePoll: "Close poll",
+    note: "This is a demo: here only you react. In a talk it is the whole room, and the server batches everything so the big screen never chokes.",
+    live: "live", phoneTitle: "The title of your talk", now: "on screen now", phoneLabel: "Audience phone",
+    hint: "Tap a reaction down here and look at the big screen.", hintPoll: "The poll is open: pick one.", hintVoted: "Counted. You can change your mind.",
+    viewsTitle: "Three screens, one for each person.", viewsLede: "These are captures of the product running, untouched.",
+    v1t: "The big screen", v1: "The slides, the reactions floating up and the poll score while it is open. It runs on localhost: no dependency on the venue's internet.",
+    v2t: "The audience", v2: "Joins through the QR code, nothing to install. Reacts, votes and opens the links on the slide.",
+    v3t: "The presenter", v3: "Script, timer, pointer and the next button, all with one hand.",
+    startTitle: "One command to start.", startLede: "You need Docker. No account anywhere, no domain.",
+    s1t: "Run the command", s1: "It starts the server with the slides inside and opens a free Cloudflare tunnel.",
+    s2t: "Open the stage link", s2: "On the laptop connected to the projector. The audience QR code shows up on the slides by itself.",
+    s3t: "Point your phone at the terminal", s3: "The QR code printed there opens the remote. Whoever has that link controls the slides.",
+    p1t: "The tunnel has a limit", p1: "The Cloudflare Quick Tunnel handles 200 requests at once and changes address every time. For a large room or a fixed address, the same command takes a named tunnel. <a href=\"https://youtu.be/mKwYfgOIAYg\">This video explains how the tunnel works</a> (in Portuguese).",
+    p2t: "No internet, the show goes on", p2: "Slides and videos come from your laptop. If the venue network drops, you keep presenting; only the audience stops reacting.",
+    featTitle: "What comes with it.",
+    f1t: "Reactions on the big screen", f1: "You choose the emojis. An optional bot claps when the room goes quiet.",
+    f2t: "A poll on any slide", f2: "You ask out loud, the room answers 👍 or 👎, one vote per phone.",
+    f3t: "Links per slide", f3: "Every source you mention shows up on the audience's phones right away, and stays there.",
+    f4t: "The screen on the phone", f4: "For people far from the big screen: the current slide goes to the phone, with zoom.",
+    f5t: "A remote with a pointer", f5: "Drag your finger on the preview and a laser, or a spotlight, shows on the big screen.",
+    f6t: "Metrics afterwards", f6: "Peak audience, reactions per slide, votes and clicks on each link. No personal data stored.",
+    f7t: "Theme without touching CSS", f7: "Colors and fonts in a config file, with light and dark themes.",
+    f8t: "Bring your own deck", f8: "A skill for coding agents migrates PowerPoint, Google Slides and Keynote, speaker notes included.",
+    f9t: "Slides in React", f9: "Ready-made blocks for lists, cards, steps, numbers, code and video. Exports to PDF.",
+    f10t: "Portuguese and English", f10: "The audience and remote interfaces follow the language of the talk.",
+    authorTitle: "Created by Danilo Dorgam, from Code in Loop.",
+    authorText: "It was born for a talk at DevOpsDays Brasília 2026 and became an open project because people asked. I write and record about development, DevOps and homelab, in Portuguese. If you present with it, let me know.",
+    l1: "all links", license: "Code under AGPL-3.0. Your slides are yours, under any license.",
+    slideAlt: "Title slide of the starter talk, with the audience QR code",
+    telaoAlt: "Slide on the big screen with reactions floating up and the poll score: 6 to 1",
+    plateiaAlt: "Audience page on a phone: poll, links mentioned and reaction buttons",
+    passadorAlt: "Remote on the presenter's phone: timer, script, slide preview and buttons",
+  };
+  const PT = {};
+  document.querySelectorAll("[data-i18n]").forEach((el) => { PT[el.dataset.i18n] = el.innerHTML; });
+  document.querySelectorAll("[data-i18n-alt]").forEach((el) => { PT[el.dataset.i18nAlt] = el.alt; });
+  Object.assign(PT, { copied: "Copiado", closePoll: "Fechar votação", hintPoll: "A votação abriu: escolha.", hintVoted: "Contado. Dá para mudar de ideia.", phoneLabel: "Celular da plateia" });
+  let lang = "pt";
+  const t = (k) => (lang === "en" ? EN[k] : PT[k]) ?? PT[k];
+  function setLang(next) {
+    lang = next;
+    document.documentElement.lang = lang === "en" ? "en" : "pt-BR";
+    document.title = lang === "en" ? "Talk in Loop · the audience joins the talk from their phones" : "Talk in Loop · a plateia entra na palestra pelo celular";
+    document.querySelectorAll("[data-i18n]").forEach((el) => { el.innerHTML = t(el.dataset.i18n); });
+    document.querySelectorAll("[data-i18n-alt]").forEach((el) => { el.alt = t(el.dataset.i18nAlt); });
+    document.querySelectorAll("[data-i18n-aria]").forEach((el) => { el.setAttribute("aria-label", t(el.dataset.i18nAria)); });
+    $("lang").textContent = lang === "en" ? "Português" : "English";
+    $("lang").setAttribute("aria-label", lang === "en" ? "Mudar para português" : "Switch to English");
+    render();
+  }
+  $("lang").addEventListener("click", () => setLang(lang === "en" ? "pt" : "en"));
+
+  // ---- a demonstração
+  const SLIDES = [
+    { file: "slide-titulo", pt: "Título", en: "Title" },
+    { file: "slide-cartoes", pt: "Cartões", en: "Cards" },
+    { file: "slide-etapas", pt: "Etapas", en: "Steps" },
+    { file: "slide-numeros", pt: "Números", en: "Numbers" },
+  ];
+  const state = { slide: 0, open: false, up: 0, down: 0, mine: null };
+
+  function render() {
+    const s = SLIDES[state.slide];
+    $("slide").src = `assets/${s.file}.webp`;
+    $("now").textContent = s[lang];
+    $("poll").textContent = t(state.open ? "closePoll" : "openPoll");
+    $("poll").setAttribute("aria-pressed", String(state.open));
+    $("score").hidden = !state.open;
+    $("vote").hidden = !state.open;
+    $("up").textContent = state.up;
+    $("down").textContent = state.down;
+    const votes = state.up + state.down;
+    $("bar").classList.toggle("empty", !votes);
+    $("bar").firstElementChild.style.width = (votes ? Math.round((state.up / votes) * 100) : 50) + "%";
+    document.querySelectorAll("#vote button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.choice === state.mine)));
+    $("hint").textContent = t(!state.open ? "hint" : state.mine ? "hintVoted" : "hintPoll");
+  }
+
+  $("next").addEventListener("click", () => { state.slide = (state.slide + 1) % SLIDES.length; render(); });
+  $("prev").addEventListener("click", () => { state.slide = (state.slide + SLIDES.length - 1) % SLIDES.length; render(); });
+  $("poll").addEventListener("click", () => {
+    state.open = !state.open;
+    if (state.open) { state.up = 0; state.down = 0; state.mine = null; }
+    render();
+  });
+  document.querySelectorAll("#vote button").forEach((b) => b.addEventListener("click", () => {
+    if (state.mine === b.dataset.choice) return;
+    if (state.mine) state[state.mine]--;
+    state.mine = b.dataset.choice;
+    state[state.mine]++;
+    render();
+  }));
+
+  function fly(emoji) {
+    const rise = $("rise");
+    if (rise.childElementCount > 28) return;
+    const el = document.createElement("span");
+    el.textContent = emoji;
+    el.style.left = 6 + Math.random() * 84 + "%";
+    el.style.animationDelay = Math.random() * 180 + "ms";
+    rise.appendChild(el);
+    setTimeout(() => el.remove(), 4200);
+  }
+  document.querySelectorAll("#reactions button").forEach((b) => b.addEventListener("click", () => { fly(b.textContent); fly(b.textContent); }));
+
+  // uma salva de palmas quando a demonstração entra na tela, uma vez só
+  const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  new IntersectionObserver((entries, io) => {
+    if (!entries[0].isIntersecting) return;
+    io.disconnect();
+    if (calm) return;
+    ["👏", "👏", "❤️", "👏", "🔥", "👏"].forEach((e, i) => setTimeout(() => fly(e), 500 + i * 260));
+  }, { threshold: 0.4 }).observe($("demo"));
+
+  $("copy").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText("docker compose up --build"); $("copy").textContent = t("copied"); setTimeout(() => { $("copy").textContent = t("copy"); }, 1600); } catch {}
+  });
+
+  const wanted = new URLSearchParams(location.search).get("lang");
+  setLang(wanted === "en" || (!wanted && !navigator.language.toLowerCase().startsWith("pt")) ? "en" : "pt");
+</script>
+</body>
+</html>

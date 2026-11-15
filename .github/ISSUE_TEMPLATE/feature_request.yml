@@ -1,0 +1,30 @@
+name: Idea
+description: Suggest something new / Sugerir algo novo
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: English or Portuguese, as you prefer. Pode escrever em português.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: The situation on stage or while preparing the talk, not the solution yet.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would help?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What do you do today instead?
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Would you send a pull request?
+      options:
+        - label: Yes, I can work on this

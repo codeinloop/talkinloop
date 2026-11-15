@@ -1,0 +1,39 @@
+name: talkinloop
+services:
+  app:
+    build:
+      context: .
+      dockerfile: backstage/Dockerfile
+      args:
+        TALK: ${TALK:-starter}
+    ports:
+      - "${PORT:-8080}:8080"
+    environment:
+      LOCAL_URL: http://localhost:${PORT:-8080}
+      DATA_DIR: /data
+      TUNNEL_METRICS: http://tunnel:2000
+      PUBLIC_URL: ${PUBLIC_URL:-}
+      PRESENTER_TOKEN: ${PRESENTER_TOKEN:-}
+      BOT_SILENCE_MS: ${BOT_SILENCE_MS:-20000}
+    volumes:
+      - data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  tunnel:
+    image: cloudflare/cloudflared:2026.10.2
+    # padrão: túnel rápido para o app. Com TUNNEL_ARGS=run e TUNNEL_TOKEN no .env, túnel nomeado.
+    command: tunnel --metrics 0.0.0.0:2000 ${TUNNEL_ARGS:---url http://app:8080}
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:-}
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  data:

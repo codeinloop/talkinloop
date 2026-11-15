@@ -1,0 +1,9 @@
+_to_delete/
+.DS_Store
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+backstage/data/
+.env
+.claude/worktrees/

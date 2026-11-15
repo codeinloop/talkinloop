@@ -1,0 +1,32 @@
+{
+  "name": "talkinloop-deck",
+  "version": "1.0.0",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "description": "Motor do deck: slides em React com camada ao vivo (reações, votação, passador)",
+  "scripts": {
+    "dev": "node scripts/prepare.mjs && next dev",
+    "prebuild": "node scripts/prepare.mjs",
+    "build": "next build",
+    "start": "npx serve out",
+    "pdf": "npm run build && node scripts/pdf.mjs",
+    "png": "npm run build && node scripts/pdf.mjs --png",
+    "typecheck": "node scripts/prepare.mjs && tsc --noEmit",
+    "new": "node scripts/new-talk.mjs",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "html-to-image": "1.11.13",
+    "next": "15.5.6",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.1",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "19.2.2",
+    "qrcode": "^1.5.4",
+    "typescript": "5.9.3"
+  },
+  "author": "Danilo Dorgam (https://codeinloop.com.br/links)"
+}

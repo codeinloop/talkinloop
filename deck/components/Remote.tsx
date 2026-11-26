@@ -5,6 +5,7 @@ import { slides } from "@/components/content";
 import { liveUrl } from "@/components/base";
 import { t } from "@/components/i18n";
 import { PreviewContext } from "@/components/preview";
+import { EMPTY_POLL, isThumbs, shares, total as pollTotal } from "@/components/poll";
 import type { RemoteKey, RemoteMessage, StageState, ToRemote, ViewMessage } from "../../backstage/protocol";
 import roteiroJson from "@/components/roteiro.json";
 
@@ -26,7 +27,7 @@ export default function Remote() {
   const [online, setOnline] = useState(false);
   const [view, setView] = useState<View | null>(null);
   const viewAt = useRef(0);
-  const [room, setRoom] = useState<Room>({ slide: { index: 0, title: "" }, links: [], poll: { id: 0, open: false, up: 0, down: 0 }, share: { on: false, v: 0 }, connected: 0, bot: false, publicUrl: "" });
+  const [room, setRoom] = useState<Room>({ slide: { index: 0, title: "" }, links: [], poll: EMPTY_POLL, share: { on: false, v: 0 }, connected: 0, bot: false, publicUrl: "" });
   const [now, setNow] = useState(0);
   const cheers = useRef<{ t: number; n: number }[]>([]);
   const [heat, setHeat] = useState(0);
@@ -230,11 +231,23 @@ export default function Remote() {
         {finger && <span className={`finger ${mode}`} style={{ left: `${finger.x * 100}%`, top: `${finger.y * 100}%` }} />}
       </div>
 
-      {room.poll.open && (
-        <div className="vote-strip" role="status" aria-label={`${room.poll.up} ${t.deck.yes}, ${room.poll.down} ${t.deck.no}`}>
-          <span>👍 <b>{room.poll.up}</b></span>
-          <div className="bar"><div style={{ width: `${room.poll.up + room.poll.down ? Math.round((room.poll.up / (room.poll.up + room.poll.down)) * 100) : 50}%` }} /></div>
-          <span><b>{room.poll.down}</b> 👎</span>
+      {room.poll.open && isThumbs(room.poll) && (
+        <div className="vote-strip" role="status" aria-label={`${room.poll.counts[0] ?? 0} ${t.deck.yes}, ${room.poll.counts[1] ?? 0} ${t.deck.no}`}>
+          <span>👍 <b>{room.poll.counts[0] ?? 0}</b></span>
+          <div className="bar"><div style={{ width: `${pollTotal(room.poll) ? shares(room.poll)[0] : 50}%` }} /></div>
+          <span><b>{room.poll.counts[1] ?? 0}</b> 👎</span>
+        </div>
+      )}
+      {room.poll.open && !isThumbs(room.poll) && (
+        <div className="vote-strip multi" role="status">
+          {room.poll.question && <p>{room.poll.question}</p>}
+          {room.poll.options.map((o, i) => (
+            <div key={i} className="row">
+              <span>{o}</span>
+              <div className="bar empty"><div style={{ width: `${shares(room.poll)[i] ?? 0}%` }} /></div>
+              <b>{room.poll.counts[i] ?? 0}</b>
+            </div>
+          ))}
         </div>
       )}
 

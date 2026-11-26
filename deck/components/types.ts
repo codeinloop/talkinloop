@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 
-export type { Link } from "../../backstage/protocol";
-import type { Link } from "../../backstage/protocol";
+export type { Link, PollSpec } from "../../backstage/protocol";
+import type { Link, PollSpec } from "../../backstage/protocol";
 
 export type SlideBase = {
   title: string;
@@ -10,6 +10,7 @@ export type SlideBase = {
   top?: boolean;
   kind?: "title" | "statement" | "final";
   links?: Link[];
+  poll?: PollSpec;     // pergunta e opções da votação deste slide; sem ela, 👍/👎
   content: ReactNode;
   notes: ReactNode;
 };

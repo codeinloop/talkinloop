@@ -1,5 +1,5 @@
 import type { Config } from "./config.ts";
-import type { Report, TimelinePoint } from "./metrics.ts";
+import type { PollRecord, Report, TimelinePoint } from "./metrics.ts";
 import type { Link } from "./protocol.ts";
 
 const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] ?? c);
@@ -63,7 +63,18 @@ export function renderReport(r: Report, links: Link[], config: Config): string {
   const kinds = Object.entries(r.reactions.byKind).sort((a, b) => b[1] - a[1]).map(([k, n]) => `${esc(emoji[k] || k)} ${n}`).join(" · ") || "—";
   const clicks = Object.entries(r.linkClicks).sort((a, b) => b[1] - a[1]);
   const totalClicks = clicks.reduce((a, [, n]) => a + n, 0);
-  const totalVotes = r.polls.reduce((a, p) => a + p.up + p.down, 0);
+  // métricas antigas guardavam só 👍/👎 em up/down
+  const tally = (p: PollRecord) => {
+    const options = p.options ?? ["👍", "👎"];
+    const counts = p.counts ?? [p.up ?? 0, p.down ?? 0];
+    return options.map((o, i) => ({ label: o, n: counts[i] ?? 0 }));
+  };
+  const totalVotes = r.polls.reduce((a, p) => a + tally(p).reduce((b, o) => b + o.n, 0), 0);
+  const result = (p: PollRecord) => {
+    const opts = tally(p);
+    const max = Math.max(0, ...opts.map((o) => o.n));
+    return opts.map((o) => (max && o.n === max ? `<b>${esc(o.label)} ${o.n}</b>` : `${esc(o.label)} ${o.n}`)).join(" · ");
+  };
   const card = (n: number, text: string, sub = "") => `<div class="card"><b>${n}</b><span>${esc(text)}</span>${sub ? `<small>${sub}</small>` : ""}</div>`;
   const pad = (n: number) => String(n).padStart(2, "0");
   const empty = (cols: number, text: string) => `<tr><td colspan="${cols}" class="muted">${esc(text)}</td></tr>`;
@@ -91,8 +102,8 @@ ${chart(r.timeline)}
 ${r.slides.map((s) => `<tr><td>${pad(s.slide)}</td><td class="t">${esc(s.title)}</td><td class="n">${dur(s.timeMs)}</td><td class="n">${s.reactions}</td><td class="n">${s.peakAudience}</td><td>${time(s.firstAt)}</td></tr>`).join("") || empty(6, t.noSlides)}
 </tbody></table></div>
 <h2>${esc(t.pollsTitle)}</h2>
-<div class="scroll"><table><thead><tr><th>#</th><th>${esc(t.slide)}</th><th class="n">👍</th><th class="n">👎</th><th>${esc(t.openedAt)}</th><th>${esc(t.duration)}</th></tr></thead><tbody>
-${r.polls.map((p) => `<tr><td>${p.n}</td><td class="t">${p.slide ? pad(p.slide) + " · " : ""}${esc(p.slideTitle)}</td><td class="n">${p.up}</td><td class="n">${p.down}</td><td>${time(p.openedAt)}</td><td>${p.closedAt ? dur(Date.parse(p.closedAt) - Date.parse(p.openedAt)) : esc(t.open)}</td></tr>`).join("") || empty(6, t.noPolls)}
+<div class="scroll"><table><thead><tr><th>#</th><th>${esc(t.slide)}</th><th>${esc(t.question)}</th><th>${esc(t.result)}</th><th>${esc(t.openedAt)}</th><th>${esc(t.duration)}</th></tr></thead><tbody>
+${r.polls.map((p) => `<tr><td>${p.n}</td><td class="t">${p.slide ? pad(p.slide) + " · " : ""}${esc(p.slideTitle)}</td><td class="t">${esc(p.question || "—")}</td><td class="t">${result(p)}</td><td>${time(p.openedAt)}</td><td>${p.closedAt ? dur(Date.parse(p.closedAt) - Date.parse(p.openedAt)) : esc(t.open)}</td></tr>`).join("") || empty(7, t.noPolls)}
 </tbody></table></div>
 <h2>${esc(t.clicksTitle)}</h2>
 <div class="scroll"><table><thead><tr><th>${esc(t.link)}</th><th class="n">${esc(t.clicksCol)}</th></tr></thead><tbody>

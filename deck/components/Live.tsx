@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { liveUrl, sample } from "@/components/base";
 import { EMOJI, FALLBACK_EMOJI } from "@/components/config";
 import { t } from "@/components/i18n";
-import type { Link } from "@/components/types";
+import { EMPTY_POLL, isThumbs, shares, total } from "@/components/poll";
+import type { Link, PollSpec } from "@/components/types";
 import type { DeckMessage, StageState, ToDeck } from "../../backstage/protocol";
 
 type Reaction = { id: number; kind: string; x: number; delay: number };
@@ -13,7 +14,7 @@ type Pointer = { x: number; y: number; mode: "laser" | "spot"; off: boolean; tap
 const PER_BURST = 8;
 
 type Props = {
-  index: number; title: string; links: Link[];
+  index: number; title: string; links: Link[]; poll?: PollSpec;
   step: number; steps: number; black: boolean; notes: boolean; full: boolean; startedAt: number | null; scale: number;
   onPublicUrl?: (url: string) => void;
 };
@@ -30,10 +31,10 @@ function rootVars(): Record<string, string> {
   return vars;
 }
 
-export default function Live({ index, title, links, step, steps, black, notes, full, startedAt, scale, onPublicUrl }: Props) {
+export default function Live({ index, title, links, poll, step, steps, black, notes, full, startedAt, scale, onPublicUrl }: Props) {
   const ws = useRef<WebSocket | null>(null);
   const [online, setOnline] = useState(false);
-  const [state, setState] = useState<StageState>({ slide: { index: 0, title: "" }, links: [], poll: { id: 0, open: false, up: 0, down: 0 }, share: { on: false, v: 0 }, connected: 0, bot: false, publicUrl: "" });
+  const [state, setState] = useState<StageState>({ slide: { index: 0, title: "" }, links: [], poll: EMPTY_POLL, share: { on: false, v: 0 }, connected: 0, bot: false, publicUrl: "" });
   const [reactions, setReactions] = useState<Reaction[]>([]);
   const [pointer, setPointer] = useState<Pointer | null>(null);
   const seq = useRef(0);
@@ -91,8 +92,8 @@ export default function Live({ index, title, links, step, steps, black, notes, f
   useEffect(() => { if (publicUrl) onPublicUrl?.(publicUrl); }, [publicUrl, onPublicUrl]);
 
   useEffect(() => {
-    if (online) sendMsg({ type: "slide", index, title, links });
-  }, [online, index, title, links]);
+    if (online) sendMsg({ type: "slide", index, title, links, poll });
+  }, [online, index, title, links, poll]);
 
   useEffect(() => {
     if (online) sendMsg({ type: "view", index, step: Math.min(step, steps), steps, black, notes, full, elapsed: startedAt ? Date.now() - startedAt : null });
@@ -143,8 +144,11 @@ export default function Live({ index, title, links, step, steps, black, notes, f
   }, [state.bot, state.poll.open]);
 
   if (!online) return null;
-  const votes = state.poll.up + state.poll.down;
-  const upPct = votes ? Math.round((state.poll.up / votes) * 100) : 50;
+  const p = state.poll;
+  const votes = total(p);
+  const pct = shares(p);
+  const thumbs = isThumbs(p);
+  const [up = 0, down = 0] = p.counts;
 
   return (
     <>
@@ -165,13 +169,26 @@ export default function Live({ index, title, links, step, steps, black, notes, f
           </span>
         ))}
       </div>
-      {state.poll.open && (
-        <div className="poll" role="status" aria-label={`${state.poll.up} ${t.deck.yes}, ${state.poll.down} ${t.deck.no}`}>
+      {p.open && thumbs && (
+        <div className="poll" role="status" aria-label={`${up} ${t.deck.yes}, ${down} ${t.deck.no}`}>
           <span className="poll-emoji">👍</span>
-          <b>{state.poll.up}</b>
-          <div className={`poll-bar ${votes ? "" : "empty"}`}><div style={{ width: `${upPct}%` }} /></div>
-          <b className="down">{state.poll.down}</b>
+          <b>{up}</b>
+          <div className={`poll-bar ${votes ? "" : "empty"}`}><div style={{ width: `${votes ? pct[0] : 50}%` }} /></div>
+          <b className="down">{down}</b>
           <span className="poll-emoji">👎</span>
+        </div>
+      )}
+      {p.open && !thumbs && (
+        <div className="poll multi" role="status" aria-label={`${p.question} ${p.options.map((o, i) => `${o}: ${p.counts[i] ?? 0}`).join(", ")}`}>
+          {p.question && <h3>{p.question}</h3>}
+          {p.options.map((o, i) => (
+            <div key={i} className="poll-row">
+              <span className="poll-label">{o}</span>
+              <div className="poll-bar empty"><div style={{ width: `${pct[i] ?? 0}%` }} /></div>
+              <b>{p.counts[i] ?? 0}</b>
+            </div>
+          ))}
+          <small>{votes} {votes === 1 ? t.deck.vote : t.deck.votes}</small>
         </div>
       )}
     </>

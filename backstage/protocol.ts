@@ -2,7 +2,11 @@
 // a plateia, /apresentador/ws é o palco), nunca de uma mensagem.
 export type Link = { label: string; url: string };
 
-export type Poll = { id: number; open: boolean; up: number; down: number };
+// pergunta definida no slide (`poll` em SlideBase); sem ela, a votação é 👍/👎 com a pergunta falada
+export type PollSpec = { question: string; options: string[] };
+
+// `counts[i]` é o total da opção `options[i]`; `question` vazia = pergunta falada
+export type Poll = { id: number; open: boolean; question: string; options: string[]; counts: number[] };
 
 // envio da tela para a plateia; `v` muda a cada foto (0 = nenhuma ainda) e vai em /tela.jpg?v=
 export type Share = { on: boolean; v: number };
@@ -18,11 +22,10 @@ export type StageState = PublicState & { connected: number; bot: boolean; public
 
 export type RemoteKey = "ArrowRight" | "ArrowLeft" | "b" | "v" | "f";
 export type PointerMode = "laser" | "spot";
-export type Vote = "up" | "down";
 
 export type AudienceMessage =
   | { type: "react"; kind: string }
-  | { type: "vote"; choice: Vote; cid?: string }
+  | { type: "vote"; choice: number; cid?: string } // índice em poll.options
   | { type: "click"; url: string };
 
 export type StageCommand =
@@ -31,7 +34,7 @@ export type StageCommand =
   | { type: "share"; on: boolean };
 
 export type DeckMessage =
-  | { type: "slide"; index: number; title: string; links: Link[] }
+  | { type: "slide"; index: number; title: string; links: Link[]; poll?: PollSpec }
   | { type: "view"; index: number; step: number; steps: number; black: boolean; notes: boolean; full: boolean; elapsed: number | null }
   | { type: "shot"; data: string } // data URL JPEG, até 2 MB, só com o envio ligado
   | StageCommand;

@@ -53,7 +53,7 @@ escolha "Salvar como PDF", margens "Nenhuma" e "Gráficos de plano de fundo".
 
 `←` `→` `espaço` `PgUp`/`PgDn` navegar (funciona com passador de slides) · `N` notas do
 apresentador · `O` visão geral · `F` tela cheia · `T` tema claro/escuro · `B` ou `.` tela preta ·
-`R` zera o cronômetro · `V` toca/pausa o vídeo · `L` robô das reações · `P` votação 👍/👎 ·
+`R` zera o cronômetro · `V` toca/pausa o vídeo · `L` robô das reações · `P` votação (👍/👎, ou a pergunta de `poll` do slide) ·
 `Home`/`End`.
 
 ## Apresentando

@@ -1,8 +1,9 @@
 # Backstage ao vivo
 
 Página que a plateia abre pelo QR (grande no primeiro e no último slide, pequeno no canto dos
-outros): vê o slide atual, os links já citados, reage (as reações vêm do `deck.config.json`) e vota 👍/👎 quando o
-apresentador abre uma votação, em qualquer slide e sem pergunta escrita (a pergunta é falada).
+outros): vê o slide atual, os links já citados, reage (as reações vêm do `deck.config.json`) e vota quando o
+apresentador abre uma votação, em qualquer slide: 👍/👎 com a pergunta falada, ou a pergunta e as
+opções que o slide define em `poll`.
 As reações aparecem flutuando no projetor.
 
 Quantas pessoas estão conectadas e se o robô está ligado aparecem **só no passador** do
@@ -86,7 +87,7 @@ Se o celular sumir no meio de um gesto, o ponteiro apaga sozinho em 5 s.
 
 `/apresentador/metricas` mostra, para consultar depois da palestra: pico de pessoas (com horário),
 celulares únicos, visitas à página, reações da plateia por tipo (as do robô contadas à parte),
-cada votação (slide, 👍, 👎, horário, duração), cliques em cada link, tempo/reações/pico por slide
+cada votação (slide, pergunta, votos por opção, horário, duração), cliques em cada link, tempo/reações/pico por slide
 e uma linha do tempo a cada 10 s. `metricas.json` baixa tudo em JSON.
 
 Fica em `metrics.json` dentro de `DATA_DIR` (no compose, o volume `data` em `/data`), gravado a
@@ -107,7 +108,7 @@ Sem dado pessoal: "celular" é um id aleatório que a página da plateia gera e 
 ## Teclas no deck
 
 - `L` liga/desliga o robô: se a plateia fica em silêncio por 20 s (`BOT_SILENCE_MS`), ele solta uma rajada curta de reações, indistinguíveis das da plateia.
-- `P` abre/fecha a votação 👍/👎, em qualquer slide (também pelo passador). Reabrir zera o placar.
+- `P` abre/fecha a votação (👍/👎, ou a `poll` do slide), em qualquer slide (também pelo passador). Reabrir zera o placar.
 
 ## Código
 
@@ -124,12 +125,12 @@ no Docker). O idioma das páginas e do terminal é o `lang` do mesmo arquivo.
 
 Os tipos estão em [`protocol.ts`](protocol.ts), que o deck também importa; o resumo:
 
-Plateia → servidor (`/ws`): `{type:"react", kind}` · `{type:"vote", choice:"up"|"down", cid}` (dá para trocar de voto; `cid` é o id do celular, guardado no navegador, e um voto por `cid` sobrevive a reconexões)
-Deck → servidor (`/apresentador/ws`): `{type:"slide", index, title, links}` · `{type:"view", index, step, steps, black, notes, full, elapsed}` · `{type:"shot", data}` (data URL JPEG, até 2 MB, só com o envio ligado) · `{type:"bot", on}` · `{type:"poll", open}`
+Plateia → servidor (`/ws`): `{type:"react", kind}` · `{type:"vote", choice, cid}` (`choice` é o índice da opção; `"up"`/`"down"` ainda valem como 0/1) (dá para trocar de voto; `cid` é o id do celular, guardado no navegador, e um voto por `cid` sobrevive a reconexões)
+Deck → servidor (`/apresentador/ws`): `{type:"slide", index, title, links, poll?}` (`poll` = `{question, options}` do slide, 2 a 6 opções) · `{type:"view", index, step, steps, black, notes, full, elapsed}` · `{type:"shot", data}` (data URL JPEG, até 2 MB, só com o envio ligado) · `{type:"bot", on}` · `{type:"poll", open}`
 Passador → servidor (`/apresentador/ws`): `{type:"hello", as:"remote"}` · `{type:"key", key}` (`ArrowRight`, `ArrowLeft`, `b`, `v`, `f`) · `{type:"share", on}` · `{type:"pointer", x, y, mode, tap}` / `{type:"pointer", off:true}` · `{type:"bot"}` · `{type:"poll"}`
 Servidor → deck: `{type:"key", key}` (só para a janela sem notas) · `{type:"pointer", ...}`
 Servidor → passador: `{type:"view", ..., decks}`
-Servidor → plateia: `{type:"state", state:{slide, links, poll:{id, open, up, down}, share:{on, v}}}` (`v` muda a cada foto; a plateia busca `/tela.jpg?v=`) (quando muda slide, link ou votação; votos no máximo a cada 250 ms)
+Servidor → plateia: `{type:"state", state:{slide, links, poll:{id, open, question, options, counts}, share:{on, v}}}` (`v` muda a cada foto; a plateia busca `/tela.jpg?v=`) (quando muda slide, link ou votação; votos no máximo a cada 250 ms)
 Servidor → palco (deck e passador): o mesmo `state` com `connected`, `bot` e `publicUrl` (o endereço do QR), e de novo a cada entrada e saída de alguém
 Servidor → todos: `{type:"burst", h:{clap:n,...}}` a cada 250 ms (plateia e robô no mesmo lote)
 

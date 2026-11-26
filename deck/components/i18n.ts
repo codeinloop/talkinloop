@@ -13,6 +13,8 @@ const ptBR = {
     poweredBy: "feito com Talk in Loop",
     yes: "sim",
     no: "não",
+    vote: "voto",
+    votes: "votos",
   },
   remote: {
     title: "Passador",
@@ -73,6 +75,8 @@ const en: Messages = {
     poweredBy: "powered by Talk in Loop",
     yes: "yes",
     no: "no",
+    vote: "vote",
+    votes: "votes",
   },
   remote: {
     title: "Remote",

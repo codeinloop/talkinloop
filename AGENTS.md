@@ -55,6 +55,7 @@ motor enxerga a apresentação só por `components/content.ts`, e o contrato est
   kind: "title",              // opcional: "title" | "statement" | "final"
   top: true,                  // opcional: alinha ao topo e reduz o título (slide com muito conteúdo)
   links: [{ label: "Texto", url: "https://..." }], // liberados para a plateia a partir deste slide
+  poll: { question: "Qual você usa?", options: ["A", "B", "C"] }, // opcional: votação deste slide (2 a 6 opções); sem ela, P abre 👍/👎
   content: (<><h2>Título</h2><p className="lead">Texto</p></>),
   notes: <p>Lembrete para o apresentador.</p>,
 }
@@ -90,7 +91,7 @@ Todo slide tem, por cima do conteúdo e sem você escrever nada:
 - **o autor** (`author.name` e `author.tagline` do config), no canto inferior esquerdo. Não repita o nome no slide: no título e no encerramento, use a linha de assinatura para outra coisa (cargo, contato, link dos slides).
 - **o QR da plateia**, pequeno (112 px) no canto inferior direito, com o endereço e o contador `04 / 12` ao lado.
 - em `title` e `final`, **o QR grande** ocupa a metade direita, o contador some e o texto fica limitado a 940 px de largura.
-- **o placar da votação**, enquanto ela está aberta, numa faixa no rodapé central. A pergunta pode estar escrita no slide ou só ser falada; não ponha nada essencial nos últimos 120 px do slide de uma votação.
+- **o placar da votação**, enquanto ela está aberta, no rodapé central. Sem `poll` no slide, é uma faixa 👍/👎 e a pergunta é falada; não ponha nada essencial nos últimos 120 px do slide de uma votação. Com `poll`, o painel mostra a pergunta e uma barra por opção e cresce com elas (cerca de 300 px com quatro opções): deixe a metade de baixo do slide livre, ou use um slide só para a pergunta.
 
 O QR só existe com o backstage no ar. No PDF ele sai apenas se houver endereço fixo, então para conferir se algum conteúdo passa por baixo dele gere com `NEXT_PUBLIC_QR_URL=https://example.com TALK=<nome> npm run png`.
 

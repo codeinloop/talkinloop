@@ -256,6 +256,14 @@ pre.code .w { color: var(--warn); border-radius: 4px; }
 .poll-bar.empty { background: var(--line); }
 .poll-bar div { height: 100%; background: var(--accent); transition: width .6s var(--ease-out); }
 .poll-bar.empty div { background: transparent; }
+/* votação com pergunta: uma linha por opção, a barra mostra a fatia de cada uma */
+.poll.multi { display: grid; gap: 10px; width: min(760px, 50vw); padding: 18px 26px; }
+.poll.multi h3 { margin: 0 0 2px; font: 700 30px/1.2 var(--font-display), ui-sans-serif, system-ui, sans-serif; }
+.poll-row { display: grid; grid-template-columns: minmax(0, 38%) 1fr 3.5ch; align-items: center; gap: 14px; }
+.poll-label { font-size: 24px; font-weight: 600; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.poll.multi b { font-size: 32px; }
+.poll.multi .poll-bar.empty div { background: var(--accent); }
+.poll.multi small { color: var(--muted); font-size: 16px; text-align: right; }
 
 .pointer-layer { pointer-events: none; z-index: 9; }
 .pointer-layer.off { opacity: 0; transition: opacity .5s ease .8s; }
@@ -318,6 +326,12 @@ pre.code .w { color: var(--warn); border-radius: 4px; }
 .remote .vote-strip b { font-size: 22px; }
 .remote .vote-strip .bar { flex: 1; height: 12px; border-radius: 6px; background: var(--warn); overflow: hidden; }
 .remote .vote-strip .bar div { height: 100%; background: var(--accent); transition: width .4s var(--ease-out); }
+.remote .vote-strip.multi { display: grid; gap: 6px; font-size: 15px; }
+.remote .vote-strip.multi p { margin: 0; font-family: inherit; font-weight: 700; }
+.remote .vote-strip.multi .row { display: grid; grid-template-columns: minmax(0, 40%) 1fr 3ch; align-items: center; gap: 8px; }
+.remote .vote-strip.multi .row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.remote .vote-strip.multi .bar.empty { background: var(--line); }
+.remote .vote-strip.multi b { font-size: 18px; text-align: right; }
 .remote .tools { display: flex; gap: 8px; }
 .remote .tools button { flex: 1 1 0; min-width: 0; min-height: 50px; padding: 0 4px; border-radius: 12px; border: 2px solid var(--line); background: var(--surface); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; touch-action: manipulation; }
 .remote .tools button:last-child { flex: 0 0 56px; }

@@ -191,14 +191,54 @@ test("votação: o palco abre, a plateia vota uma vez por celular e pode trocar"
   const phone = await connect(srv.port, "/ws?cid=votante00001");
   deck.say({ type: "poll", open: true });
   await phone.next(publicWhere((s) => s.poll.open));
-  phone.say({ type: "vote", choice: "up" });
-  phone.say({ type: "vote", choice: "up" });
-  await deck.next(stageWhere((s) => s.poll.up === 1));
-  phone.say({ type: "vote", choice: "down" });
-  const s = await deck.next(stageWhere((st) => st.poll.down === 1));
-  assert.equal(s.state.poll.up, 0);
+  phone.say({ type: "vote", choice: 0 });
+  phone.say({ type: "vote", choice: 0 });
+  await deck.next(stageWhere((s) => s.poll.counts[0] === 1));
+  phone.raw({ type: "vote", choice: "down" }); // formato antigo da página da plateia
+  const s = await deck.next(stageWhere((st) => st.poll.counts[1] === 1));
+  assert.deepEqual(s.state.poll.counts, [0, 1]);
+  assert.deepEqual(s.state.poll.options, ["👍", "👎"]);
   deck.say({ type: "poll", open: false });
   deck.close(); phone.close();
+});
+
+test("votação com pergunta: o slide define as opções e voto fora delas é ignorado", async () => {
+  const deck = await connect(srv.port, "/apresentador/ws", { cookie });
+  const phone = await connect(srv.port, "/ws?cid=votante00002");
+  const other = await connect(srv.port, "/ws?cid=votante00003");
+  deck.say({ type: "slide", index: 4, title: "Pergunta", links: [], poll: { question: "  Qual você usa?  ", options: ["A", " B ", "", "C"] } });
+  await phone.next(publicWhere((st) => st.slide.title === "Pergunta"));
+  deck.say({ type: "poll", open: true });
+  const opened = await phone.next(publicWhere((st) => st.poll.open));
+  assert.equal(opened.state.poll.question, "Qual você usa?");
+  assert.deepEqual(opened.state.poll.options, ["A", "B", "C"]);
+  assert.deepEqual(opened.state.poll.counts, [0, 0, 0]);
+  phone.say({ type: "vote", choice: 2 });
+  other.say({ type: "vote", choice: 2 });
+  phone.say({ type: "vote", choice: 3 });
+  phone.raw({ type: "vote", choice: 1.5 });
+  phone.raw({ type: "vote", choice: -1 });
+  await deck.next(stageWhere((st) => st.poll.counts[2] === 2));
+  phone.say({ type: "vote", choice: 0 });
+  const s = await deck.next(stageWhere((st) => st.poll.counts[0] === 1));
+  assert.deepEqual(s.state.poll.counts, [1, 0, 1]);
+  deck.say({ type: "poll", open: false });
+  await phone.next(publicWhere((st) => !st.poll.open));
+  const report = await (await fetch(srv.base + "/apresentador/metricas.json", { headers: { cookie } })).json() as { polls: { question?: string; options?: string[]; counts?: number[] }[] };
+  const last = report.polls.at(-1);
+  assert.equal(last?.question, "Qual você usa?");
+  assert.deepEqual(last?.counts, [1, 0, 1]);
+  assert.match(await (await fetch(srv.base + "/apresentador/metricas", { headers: { cookie } })).text(), /Qual você usa\?/);
+
+  // slide sem `poll` (ou com definição inválida) volta ao 👍/👎
+  deck.say({ type: "slide", index: 5, title: "Sem pergunta", links: [], poll: { question: "só uma", options: ["X"] } as never });
+  await phone.next(publicWhere((st) => st.slide.title === "Sem pergunta"));
+  deck.say({ type: "poll", open: true });
+  const thumbs = await phone.next(publicWhere((st) => st.poll.open && st.poll.id > opened.state.poll.id));
+  assert.equal(thumbs.state.poll.question, "");
+  assert.deepEqual(thumbs.state.poll.options, ["👍", "👎"]);
+  deck.say({ type: "poll", open: false });
+  deck.close(); phone.close(); other.close();
 });
 
 test("o deck libera links para a plateia; entrada malformada não derruba o servidor", async () => {

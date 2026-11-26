@@ -144,17 +144,18 @@ export const slides: SlideBase[] = [
       { label: "Um link citado neste slide", url: "https://example.com/artigo" },
       { label: "Outro, que fica disponível no celular", url: "https://example.com/video" },
     ],
+    poll: { question: "Qual recurso você mais usaria?", options: ["Reações", "Links no celular", "Votação", "Passador"] },
     content: (
       <>
         <h2>A plateia participa pelo celular</h2>
         <ol className="steps">
           <li>Reage, e as reações sobem no telão</li>
           <li data-frag="1">Recebe os links deste slide</li>
-          <li data-frag="2">Vota 👍 ou 👎 quando você pergunta</li>
+          <li data-frag="2">Vota quando você abre a votação</li>
         </ol>
       </>
     ),
-    notes: <p>Tecla P abre e fecha a votação, em qualquer slide. A pergunta é falada, não escrita. Tecla L liga o robô, que reage se a sala ficar em silêncio.</p>,
+    notes: <p>Tecla P abre e fecha a votação. Neste slide ela usa a pergunta e as opções de <code>poll</code>; nos outros é 👍/👎 e a pergunta é falada. Tecla L liga o robô, que reage se a sala ficar em silêncio.</p>,
   },
   {
     title: "Vídeo", block: "Ao vivo", minute: "8:00",

@@ -5,7 +5,11 @@ const TIMELINE_MAX = 20000;
 const iso = (t = Date.now()) => new Date(t).toISOString();
 
 type SlideRecord = { title: string; timeMs: number; reactions: number; peakAudience: number; firstAt: string };
-export type PollRecord = { n: number; slide: number | null; slideTitle: string; openedAt: string; closedAt: string | null; up: number; down: number };
+// `up`/`down` só existem em métricas gravadas antes da votação com opções
+export type PollRecord = {
+  n: number; slide: number | null; slideTitle: string; openedAt: string; closedAt: string | null;
+  question?: string; options?: string[]; counts?: number[]; up?: number; down?: number;
+};
 export type TimelinePoint = { t: string; a: number; r: number; b: number; v: number; s: number | null };
 
 type Stored = {
@@ -29,7 +33,7 @@ export type Report = Omit<Stored, "devices" | "slides"> & {
   archives: string[];
 };
 
-type Tally = { up: number; down: number };
+type Tally = { question: string; options: string[]; counts: number[] };
 
 function blank(): Stored {
   return {
@@ -96,14 +100,17 @@ export function createMetrics({ dataDir, getAudience }: { dataDir: string | unde
       current = { index, title, at: now };
       slideRec(index, title);
     },
-    pollOpen() {
-      livePoll = { n: m.polls.length + 1, slide: current ? current.index + 1 : null, slideTitle: current ? current.title : "", openedAt: iso(), closedAt: null, up: 0, down: 0 };
+    pollOpen(poll: Tally) {
+      livePoll = {
+        n: m.polls.length + 1, slide: current ? current.index + 1 : null, slideTitle: current ? current.title : "", openedAt: iso(), closedAt: null,
+        question: poll.question, options: [...poll.options], counts: [...poll.counts],
+      };
       m.polls.push(livePoll);
     },
-    pollVote(poll: Tally) { win.v++; if (livePoll) { livePoll.up = poll.up; livePoll.down = poll.down; } },
+    pollVote(poll: Tally) { win.v++; if (livePoll) livePoll.counts = [...poll.counts]; },
     pollClose(poll: Tally) {
       if (!livePoll) return;
-      livePoll.up = poll.up; livePoll.down = poll.down; livePoll.closedAt = iso();
+      livePoll.counts = [...poll.counts]; livePoll.closedAt = iso();
       livePoll = null;
     },
     tick() {

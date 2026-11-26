@@ -9,7 +9,7 @@ import { WebSocketServer } from "ws";
 import type { WebSocket } from "ws";
 import { httpUrl, loadConfig } from "./config.ts";
 import { createMetrics } from "./metrics.ts";
-import type { PointerMessage, Poll, PublicState, RemoteKey, ServerMessage, Share, StageState, ViewMessage, Vote } from "./protocol.ts";
+import type { PointerMessage, Poll, PollSpec, PublicState, RemoteKey, ServerMessage, Share, StageState, ViewMessage } from "./protocol.ts";
 import { renderReport } from "./report.ts";
 
 const PORT = Number(process.env.PORT || 8080);
@@ -54,16 +54,30 @@ function deny(res: ServerResponse) {
   res.end(DENIED);
 }
 
-const state: { slide: PublicState["slide"]; links: PublicState["links"]; bot: boolean; poll: Poll; share: Share } = {
+const state: { slide: PublicState["slide"]; links: PublicState["links"]; bot: boolean; poll: Poll; share: Share; slidePoll: PollSpec | null } = {
   slide: { index: 0, title: "" },
   links: [],
   bot: false,
-  poll: { id: 0, open: false, up: 0, down: 0 },
+  poll: { id: 0, open: false, question: "", options: ["👍", "👎"], counts: [0, 0] },
   share: { on: false, v: 0 },
+  slidePoll: null, // a pergunta do slide atual, usada quando o apresentador abre a votação
 };
+
+// Sem pergunta no slide, a votação é 👍/👎 e a pergunta é falada.
+const THUMBS: PollSpec = { question: "", options: ["👍", "👎"] };
+const POLL_OPTIONS_MAX = 6;
+// A definição vem do deck, mas é conferida como qualquer entrada: texto curto, 2 a 6 opções.
+function pollSpec(v: unknown): PollSpec | null {
+  if (typeof v !== "object" || v === null) return null;
+  const { question, options } = v as { question?: unknown; options?: unknown };
+  if (!Array.isArray(options)) return null;
+  const opts = options.filter((o): o is string => typeof o === "string").map((o) => o.trim().slice(0, 80)).filter(Boolean).slice(0, POLL_OPTIONS_MAX);
+  if (opts.length < 2) return null;
+  return { question: typeof question === "string" ? question.trim().slice(0, 200) : "", options: opts };
+}
 let shot: Buffer | null = null;
 const SHOT_MAX = 2 * 1024 * 1024;
-const votes = new Map<string, Vote>();
+const votes = new Map<string, number>();
 let lastHumanReaction = 0;
 
 const metrics = createMetrics({ dataDir: process.env.DATA_DIR, getAudience: () => audience() });
@@ -271,15 +285,18 @@ wss.on("connection", (ws: Client) => {
         break;
       }
       case "vote": {
-        if (!state.poll.open || (m.choice !== "up" && m.choice !== "down")) return;
+        // "up"/"down" é o formato antigo da página da plateia (aberta antes de atualizar o servidor)
+        const choice = m.choice === "up" ? 0 : m.choice === "down" ? 1 : m.choice;
+        if (!state.poll.open || typeof choice !== "number" || !Number.isInteger(choice) || choice < 0 || choice >= state.poll.counts.length) return;
         // O celular manda um id que guarda no navegador: reconectar (tela apagada) não vira voto novo.
         // Cada socket fica com o primeiro id que mandou, para não dar para inflar trocando o id.
         ws.cid ??= ws.connCid || validCid(m.cid) || `ws:${Math.random()}`;
         const prev = votes.get(ws.cid);
-        if (prev === m.choice) return;
-        if (prev) state.poll[prev]--;
-        state.poll[m.choice]++;
-        votes.set(ws.cid, m.choice);
+        if (prev === choice) return;
+        const counts = state.poll.counts;
+        if (prev !== undefined) counts[prev] = (counts[prev] ?? 1) - 1;
+        counts[choice] = (counts[choice] ?? 0) + 1;
+        votes.set(ws.cid, choice);
         metrics.pollVote(state.poll);
         sendStateSoon();
         break;
@@ -300,6 +317,7 @@ wss.on("connection", (ws: Client) => {
           const { url: u, label } = l as { url?: unknown; label?: unknown };
           if (typeof u === "string" && u && !state.links.some((k) => k.url === u)) state.links.push({ label: String(label || u), url: u });
         }
+        state.slidePoll = pollSpec(m.poll);
         sendState();
         break;
       }
@@ -352,7 +370,12 @@ wss.on("connection", (ws: Client) => {
         break;
       case "poll":
         if (!stage) return;
-        if (m.open && !state.poll.open) { state.poll = { id: state.poll.id + 1, open: true, up: 0, down: 0 }; votes.clear(); metrics.pollOpen(); }
+        if (m.open && !state.poll.open) {
+          const spec = state.slidePoll ?? THUMBS;
+          state.poll = { id: state.poll.id + 1, open: true, question: spec.question, options: [...spec.options], counts: spec.options.map(() => 0) };
+          votes.clear();
+          metrics.pollOpen(state.poll);
+        }
         else if (!m.open && state.poll.open) { state.poll.open = false; metrics.pollClose(state.poll); }
         sendState();
         break;
